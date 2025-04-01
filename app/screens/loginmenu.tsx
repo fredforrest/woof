@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LoginMenu = () => {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* App Logo */}
       <Image
-        source={require('../../assets/logo.png')} // Replace with your logo path
+        source={require('../images/wooflogo.jpg')}
         style={styles.logo}
       />
 
@@ -19,7 +20,7 @@ const LoginMenu = () => {
       <TouchableOpacity style={[styles.button, styles.googleButton]}>
         <Text style={styles.buttonText}>Login with Google</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -31,8 +32,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 300,
+    height: 300,
     marginBottom: 40,
   },
   button: {
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#DB4437', // Google red
   },
   buttonText: {
-    color: '#fff',
+    color: '#fff', // White text
     fontSize: 16,
     fontWeight: 'bold',
   },
