@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "917951632143",
+    "project_id": "woofy-97941",
+    "storage_bucket": "woofy-97941.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917951632143:android:345c57d3c52f1f2a18e47a",
+        "android_client_info": {
+          "package_name": "com.woof"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcBfE5IA-6zNVk9-G9IwDdG-zhoQR9ZJ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
