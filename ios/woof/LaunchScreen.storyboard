@@ -33,6 +33,7 @@
             <point key="canvasLocation" x="52" y="374.66266866566718"/>
         </scene>
     </scenes>
+    <color key="tintColor" red="0.99215686319999996" green="0.99215686319999996" blue="0.99215686319999996" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
     <resources>
         <image name="splash" width="256" height="256"/>
         <systemColor name="systemBackgroundColor">
