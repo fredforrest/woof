@@ -12,7 +12,20 @@
           "package_name": "com.woof"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "917951632143-mpkue44ih1iolcbdj33tqreijevekffc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.woof",
+            "certificate_hash": "cb4e12fbdf366b1de44f0b8e4a48f0c292155517"
+          }
+        },
+        {
+          "client_id": "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBcBfE5IA-6zNVk9-G9IwDdG-zhoQR9ZJ8"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "917951632143-4gfgsa42pnjt9bcepsbtetqmdc2ajkgm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.woof"
+              }
+            }
+          ]
         }
       }
     }
