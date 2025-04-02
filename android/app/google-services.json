@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "917951632143",
+    "project_id": "woofy-97941",
+    "storage_bucket": "woofy-97941.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917951632143:android:345c57d3c52f1f2a18e47a",
+        "android_client_info": {
+          "package_name": "com.woof"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917951632143-mpkue44ih1iolcbdj33tqreijevekffc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.woof",
+            "certificate_hash": "cb4e12fbdf366b1de44f0b8e4a48f0c292155517"
+          }
+        },
+        {
+          "client_id": "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcBfE5IA-6zNVk9-G9IwDdG-zhoQR9ZJ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "917951632143-4gfgsa42pnjt9bcepsbtetqmdc2ajkgm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.woof"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
