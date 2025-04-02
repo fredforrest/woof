@@ -10,6 +10,7 @@ const Stack = createNativeStackNavigator();
 
 GoogleSignin.configure({
   webClientId: "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
+  iosClientId: "917951632143-4gfgsa42pnjt9bcepsbtetqmdc2ajkgm.apps.googleusercontent.com",
 });
 
 
