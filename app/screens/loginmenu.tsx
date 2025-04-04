@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import GoogleButton from '../buttons/googlebutton';
+import GoogleButton from '../components/buttons/googlebutton';
 
 const LoginMenu = () => {
   return (
