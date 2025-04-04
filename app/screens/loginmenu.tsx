@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import GoogleButton from '../buttons/googlebutton';
 
 const LoginMenu = () => {
   return (
@@ -16,9 +17,8 @@ const LoginMenu = () => {
       </TouchableOpacity>
 
       {/* Google Login Button */}
-      <TouchableOpacity style={[styles.button, styles.googleButton]}>
-        <Text style={styles.buttonText}>Login with Google</Text>
-      </TouchableOpacity>
+      <GoogleButton/>
+
     </SafeAreaView>
   );
 };
