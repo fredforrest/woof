@@ -1,7 +1,8 @@
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, Image, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import GoogleButton from '../components/buttons/googlebutton';
+import Separator from '../components/separator';
 
 const LoginMenu = () => {
   return (
@@ -11,12 +12,15 @@ const LoginMenu = () => {
         style={styles.logo}
       />
 
-      {/* Facebook Login Button */}
-      <TouchableOpacity style={[styles.button, styles.facebookButton]}>
-        <Text style={styles.buttonText}>Login with Facebook</Text>
-      </TouchableOpacity>
+      <TextInput>
+        <Text>Email</Text>
+      </TextInput>
+      <TextInput>
+        <Text>Password</Text>
+        </TextInput>
 
-      {/* Google Login Button */}
+        <Separator text='Or' />
+        
       <GoogleButton/>
 
     </SafeAreaView>
