@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         marginBottom: 10, // Add spacing between buttons
     },
     loginButton: {
-        backgroundColor: '#4CAF50', // Green for login or register
+        backgroundColor: '#2196F3', 
     },
     buttonText: {
         color: '#FFF',

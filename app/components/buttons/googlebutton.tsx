@@ -1,7 +1,7 @@
 import React from 'react';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, Alert, Image, View} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '../navigation/types';
 
@@ -38,7 +38,10 @@ export default function GoogleSignIn() {
 
   return (
     <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
-      <Text style={styles.text}>Sign in with Google</Text>
+      <View style={styles.logoContainer}>
+      <Image source={require('../../images/google-g-logo.png')} style={styles.image} />
+     </View> 
+     <Text style={styles.text}>Sign in with Google</Text>
     </TouchableOpacity>
   );
 }
@@ -57,5 +60,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', // White text
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  logoContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16, // Circular background
+    backgroundColor: '#FFFFFF', // White background
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10, // Spacing between the logo and text
+  },
+  image: {
+    width: 20, // Adjust the size of the Google "G" image
+    height: 20,
   },
 });
