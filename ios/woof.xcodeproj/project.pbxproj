@@ -11,6 +11,7 @@
 		6E1840332D88F15CA140BD6B /* Pods_woof.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C0DCFC5F048DAFFB9DDE08D /* Pods_woof.framework */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		86242E732DA3E9C900BDE4D0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 86242E722DA3E9C900BDE4D0 /* GoogleService-Info.plist */; };
 		8637620E2D9D4D8B00C5809A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8637620D2D9D4D8B00C5809A /* GoogleService-Info.plist */; };
 		B129DB8B677CD68EBFA408F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,7 @@
 		4085C93BC9225740C2F029B9 /* Pods-woof.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-woof.release.xcconfig"; path = "Target Support Files/Pods-woof/Pods-woof.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = woof/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = woof/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		86242E722DA3E9C900BDE4D0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8637620C2D9D3BC800C5809A /* woof.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = woof.entitlements; path = woof/woof.entitlements; sourceTree = "<group>"; };
 		8637620D2D9D4D8B00C5809A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C2D9B8CE61C9C0F1174985B7 /* Pods-woof.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-woof.debug.xcconfig"; path = "Target Support Files/Pods-woof/Pods-woof.debug.xcconfig"; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				86242E722DA3E9C900BDE4D0 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* woof */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -167,6 +170,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				B129DB8B677CD68EBFA408F1 /* PrivacyInfo.xcprivacy in Resources */,
+				86242E732DA3E9C900BDE4D0 /* GoogleService-Info.plist in Resources */,
 				8637620E2D9D4D8B00C5809A /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

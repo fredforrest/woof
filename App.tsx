@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import HomeScreen from './app/screens/homescreen';
+import { RootStackParamList } from './app/components/navigation/types';
 
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 GoogleSignin.configure({
   webClientId: "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
@@ -28,6 +30,7 @@ const App = () => {
             <NavigationContainer>
                 <Stack.Navigator screenOptions={scrOptions}>
                     <Stack.Screen name="Login Menu" component={LoginMenu} />
+                    <Stack.Screen name="Home" component={HomeScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaView>

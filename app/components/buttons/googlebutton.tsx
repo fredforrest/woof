@@ -1,34 +1,45 @@
+import React from 'react';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackNavigationProp } from '../navigation/types';
 
 export default function GoogleSignIn() {
+  const navigation = useNavigation<RootStackNavigationProp>();
+
   async function onGoogleButtonPress() {
-    // Check if your device supports Google Play
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Get the users ID token
-    const signInResult = await GoogleSignin.signIn();
-  
-    // Try the new style of google-sign in result, from v13+ of that module
-    let idToken = signInResult.data?.idToken;
-    if (!idToken) {
-      // if you are using older versions of google-signin, try old style result
-      idToken = signInResult.data?.idToken;
+    try {
+      // Check if your device supports Google Play
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+      // Get the user's ID token
+      const signInResult = await GoogleSignin.signIn();
+      const idToken = signInResult.data?.idToken;
+
+      if (!idToken) {
+        throw new Error('No ID token found');
+      } 
+
+      // Create a Google credential with the token
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      // Sign-in the user with the credential
+      await auth().signInWithCredential(googleCredential);
+
+      // Navigate to the Home screen after successful sign-in
+      Alert.alert('Success', 'Signed in with Google!');
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      Alert.alert('Error', 'Failed to sign in with Google.');
     }
-    if (!idToken) {
-      throw new Error('No ID token found motherfuka');
-    }
-  
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-  
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
   }
+
   return (
     <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
-    <Text style={styles.text}>Sign in with Google</Text>
-  </TouchableOpacity>
+      <Text style={styles.text}>Sign in with Google</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -48,7 +59,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-
-
-
