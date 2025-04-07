@@ -14,6 +14,8 @@ export type RootStackParamList = {
   // Use the exact string names from your <Stack.Screen name="..." /> components
   'Login Menu': undefined;
   Home: undefined; // This screen does not need quotes around the name, when it is a single word
+  'Chat Rooms': undefined;
+    Profile: undefined; // This screen does not need quotes around the name, when it is a single word
 
   // Add any other screens in this specific Stack Navigator here
   // Example: Profile: { userId: string };
