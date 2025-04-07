@@ -40,11 +40,11 @@ export default function GoogleSignIn() {
     <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
       <View style={styles.logoContainer}>
       <Image source={require('../../images/google-g-logo.png')} style={styles.image} />
-     </View> 
+     </View>      
      <Text style={styles.text}>Sign in with Google</Text>
     </TouchableOpacity>
   );
-}
+};
 
 const styles = StyleSheet.create({
   button: {

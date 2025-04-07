@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import GoogleButton from '../components/buttons/googlebutton';
-import Separator from '../components/separator';
+import Separator from '../components/ui/separator';
 import EmailLogin from '../components/forms/emaillogin';
 
 const LoginMenu = () => {
