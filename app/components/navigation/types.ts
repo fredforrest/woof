@@ -12,30 +12,18 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
  */
 export type RootStackParamList = {
   // Use the exact string names from your <Stack.Screen name="..." /> components
-  'Login Menu': undefined;
+  LoginMenu: undefined;
   Home: undefined; // This screen does not need quotes around the name, when it is a single word
-  'Chat Rooms': undefined;
+  ChatRooms: undefined;
     Profile: undefined; 
     'Profile Settings': undefined;
+    'Create Room': undefined;
+    ChatScreen: { roomId: string; 
+      roomName: string;
+}; // Example of a screen that expects parameters
 
-  // Add any other screens in this specific Stack Navigator here
-  // Example: Profile: { userId: string };
 };
 
-/**
- * Optional: Defines a reusable type for the navigation prop specific to the RootStack.
- *
- * This makes it slightly cleaner to type the 'useNavigation' hook in your screens.
- * Instead of writing: useNavigation<NativeStackNavigationProp<RootStackParamList>>()
- * You can write: useNavigation<RootStackNavigationProp>()
- *
- * The <RouteName extends keyof RootStackParamList = 'Home'> part makes it generic
- * and provides a default screen context, though React Navigation often infers
- * the correct screen context automatically when the stack is typed.
- */
 export type RootStackNavigationProp<
   RouteName extends keyof RootStackParamList = keyof RootStackParamList,
 > = NativeStackNavigationProp<RootStackParamList, RouteName>;
-
-// If you had other navigators (e.g., a Tab navigator nested inside a screen),
-// you would define separate ParamList types for them as well.

@@ -8,11 +8,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const HomeScreen = () => {
     const navigation = useNavigation<RootStackNavigationProp>();
 
+    // Handle Logout
+    // This function will be called when the user presses the "Log Out" button
     const handleLogout = async () => {
         try {
             await auth().signOut();
             Alert.alert('Success', 'You have been logged out.');
-            navigation.navigate('Login Menu'); // Navigate back to the login screen
+            navigation.navigate('LoginMenu'); // Navigate back to the login screen
         } catch (error) {
             console.error('Logout Error:', error);
             Alert.alert('Error', 'Failed to log out. Please try again.');
@@ -41,7 +43,7 @@ const HomeScreen = () => {
             {/* Navigate to Chat Rooms */}
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Chat Rooms')}
+                onPress={() => navigation.navigate('ChatRooms')}
             >
                 <Text style={styles.buttonText}>Go to Chat Rooms</Text>
             </TouchableOpacity>

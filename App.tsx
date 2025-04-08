@@ -10,9 +10,12 @@ import ChatRooms from './app/screens/chatrooms';
 import Profile from './app/screens/profile';
 import ProfileSettings from './app/screens/profilesettings';
 import { RootStackParamList } from './app/components/navigation/types';
+import CreateChat from './app/screens/createchat';
+import ChatScreen from './app/screens/chatscreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// Configure Google Sign-In
 GoogleSignin.configure({
   webClientId: "917951632143-k3j5bkl1k86n8sibqpcgf54v8p4bupag.apps.googleusercontent.com",
   iosClientId: "917951632143-4gfgsa42pnjt9bcepsbtetqmdc2ajkgm.apps.googleusercontent.com",
@@ -28,6 +31,7 @@ const App = () => {
         if (initializing) setInitializing(false);
     }
 
+    // Subscribe to authentication state changes
     useEffect(() => {
         const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
         return subscriber; // Unsubscribe on unmount
@@ -49,12 +53,15 @@ const App = () => {
                     {user ? (
                         <>
                             <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-                            <Stack.Screen name="Chat Rooms" component={ChatRooms} options={{ headerShown: true }} />
+                            <Stack.Screen name="ChatRooms" component={ChatRooms} options={{ headerShown: true }} />
                             <Stack.Screen name="Profile" component={Profile} options={{ headerShown: true }} />
                             <Stack.Screen name="Profile Settings" component={ProfileSettings} options={{ headerShown: true }} />
+                            <Stack.Screen name="Create Room" component={CreateChat} options={{ headerShown: true }} />
+                            <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true}} />
+                            <Stack.Screen name="LoginMenu" component={LoginMenu} options={{ headerShown: false }} />
                         </>
                     ) : (
-                        <Stack.Screen name="Login Menu" component={LoginMenu} options={{ headerShown: false }} />
+                        <Stack.Screen name="LoginMenu" component={LoginMenu} options={{ headerShown: false }} />
                     )}
                 </Stack.Navigator>
             </NavigationContainer>

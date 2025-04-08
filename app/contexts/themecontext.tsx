@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
 
+// this is for adding dark mode to the app
+// it will be used in the app.tsx file
 const ThemeContext = createContext({
     isDarkTheme: false,
     toggleTheme: () => {},
