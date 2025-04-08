@@ -29,8 +29,6 @@ const ChatRooms = ({ }) => { // Pass navigation prop
     const [refreshing, setRefreshing] = useState(false);
 
 
-
-
   // --- Firestore Listener Setup ---
   useEffect(() => {
     const subscriber = firestore()
