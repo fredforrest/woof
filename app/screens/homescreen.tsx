@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { RootStackNavigationProp } from '../components/navigation/types';
@@ -12,7 +12,7 @@ const HomeScreen = () => {
         try {
             await auth().signOut();
             Alert.alert('Success', 'You have been logged out.');
-            navigation.navigate("Login Menu"); // Navigate back to the login screen
+            navigation.navigate('Login Menu'); // Navigate back to the login screen
         } catch (error) {
             console.error('Logout Error:', error);
             Alert.alert('Error', 'Failed to log out. Please try again.');
@@ -21,6 +21,13 @@ const HomeScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Logo/Image */}
+            <Image
+                source={require('../images/homelogo.jpg')}
+                style={styles.logo}
+            />
+
+            {/* Title */}
             <Text style={styles.title}>Welcome to Woof Chat!</Text>
 
             {/* Navigate to Profile */}
@@ -50,7 +57,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // Move content to the top
         alignItems: 'center',
         backgroundColor: '#FDFDFD',
         padding: 16,
@@ -58,7 +65,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginBottom: 50,
         color: '#333',
     },
     button: {
@@ -68,6 +75,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 15,
         width: '80%',
+        marginTop: 30,
     },
     logoutButton: {
         backgroundColor: '#FF3B30', // Red button for logout
@@ -76,6 +84,12 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    logo: {
+        width: 200,
+        height: 200,
+        marginBottom: 20,
+        marginTop: 20, // Add margin to move the image down slightly from the top
     },
 });
 
