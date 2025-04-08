@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { RootStackNavigationProp } from '../components/navigation/types';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
     const navigation = useNavigation<RootStackNavigationProp>();
@@ -11,7 +12,7 @@ const HomeScreen = () => {
         try {
             await auth().signOut();
             Alert.alert('Success', 'You have been logged out.');
-            navigation.navigate('Login Menu'); // Navigate back to the login screen
+            navigation.navigate("Login Menu"); // Navigate back to the login screen
         } catch (error) {
             console.error('Logout Error:', error);
             Alert.alert('Error', 'Failed to log out. Please try again.');
@@ -19,7 +20,7 @@ const HomeScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Welcome to Woof Chat!</Text>
 
             {/* Navigate to Profile */}
@@ -42,7 +43,7 @@ const HomeScreen = () => {
             <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
                 <Text style={styles.buttonText}>Log Out</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 };
 

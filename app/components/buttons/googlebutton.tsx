@@ -39,7 +39,7 @@ export default function GoogleSignIn() {
   return (
     <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
       <View style={styles.logoContainer}>
-      <Image source={require('../../images/google-g-logo.png')} style={styles.image} />
+      <Image source={require('../../images/google-logo.png')} style={styles.image} />
      </View>      
      <Text style={styles.text}>Sign in with Google</Text>
     </TouchableOpacity>

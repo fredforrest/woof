@@ -1,17 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { RootStackNavigationProp } from '../components/navigation/types';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Profile = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<RootStackNavigationProp>();
     {
         return (
-            <View style={styles.container}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Text style={styles.backButtonText}>Back</Text>
-                </TouchableOpacity>
-                <Text style={styles.text}>Profile</Text>
-            </View>
+    <SafeAreaView style={styles.container}>
+
+        <TouchableOpacity 
+            style={styles.settingsButton} 
+            onPress={() => navigation.navigate('Profile Settings')}>
+            <Text style={styles.settingsButtonText}>Settings</Text>
+        </TouchableOpacity>
+        <Text style={styles.text}>Profile</Text>
+    </SafeAreaView>
         );
     }
 }
@@ -26,15 +31,15 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
     },
-    backButton: {
+    settingsButton: {
         position: 'absolute',
         top: 10,
-        left: 10,
+        right: 10,
         backgroundColor: '#2196F3', // Blue background for the button
         padding: 10,
         borderRadius: 5,
     },
-    backButtonText: {
+    settingsButtonText: {
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold',

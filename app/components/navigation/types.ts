@@ -15,7 +15,8 @@ export type RootStackParamList = {
   'Login Menu': undefined;
   Home: undefined; // This screen does not need quotes around the name, when it is a single word
   'Chat Rooms': undefined;
-    Profile: undefined; // This screen does not need quotes around the name, when it is a single word
+    Profile: undefined; 
+    'Profile Settings': undefined;
 
   // Add any other screens in this specific Stack Navigator here
   // Example: Profile: { userId: string };

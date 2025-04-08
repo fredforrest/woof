@@ -1,19 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ChatRooms = () => {
     const navigation = useNavigation();
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Back Button */}
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
 
             <Text style={styles.text}>Chat Rooms</Text>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -24,19 +22,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#fff',
         paddingTop: 50, // Add padding to avoid overlap with the back button
-    },
-    backButton: {
-        position: 'absolute',
-        top: 10,
-        left: 10,
-        backgroundColor: '#2196F3', // Blue background for the button
-        padding: 10,
-        borderRadius: 5,
-    },
-    backButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: 'bold',
     },
     text: {
         fontSize: 24,
