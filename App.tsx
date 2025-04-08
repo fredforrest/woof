@@ -10,7 +10,6 @@ import ChatRooms from './app/screens/chatrooms';
 import Profile from './app/screens/profile';
 import ProfileSettings from './app/screens/profilesettings';
 import { RootStackParamList } from './app/components/navigation/types';
-import { ThemeProvider, useTheme } from './app/contexts/themecontext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -24,7 +23,7 @@ const App = () => {
     const [user, setUser] = useState(null);
 
     // Handle user state changes
-    function onAuthStateChanged(user: any) {
+    function onAuthStateChanged(user) {
         setUser(user);
         if (initializing) setInitializing(false);
     }
@@ -35,17 +34,15 @@ const App = () => {
     }, []);
 
     if (initializing) return null; // Optionally, show a loading indicator here
-
-    const {isDarkTheme} = useTheme();
+    
 
     const scrOptions = {
-        headerStyle: { backgroundColor: isDarkTheme ? '#121212' : '#2196F3' },
-        headerTintColor: isDarkTheme ? '#fff' : '#fff',
+        headerStyle: { backgroundColor: '#2196F3' },
+        headerTintColor: '#fff',
         headerBackTitleVisible: false,
     };
 
     return (
-        
         <SafeAreaView style={{ flex: 1 }}>
             <NavigationContainer>
                 <Stack.Navigator screenOptions={scrOptions}>
@@ -62,7 +59,6 @@ const App = () => {
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaView>
-        
     );
 };
 
