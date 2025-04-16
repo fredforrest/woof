@@ -13,6 +13,7 @@ const CreateRoomScreen = ({}) => {
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateRoom = async () => {
+    // check if roomName is empty
     if (!roomName.trim()) {
       Alert.alert('Error', 'Please enter a room name.');
       return;

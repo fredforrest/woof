@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '../components/navigation/types';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import auth from '@react-native-firebase/auth';
 
 const Profile = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
+  const currentUser = auth().currentUser;
+  const userName = currentUser?.displayName || 'User';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -15,7 +18,7 @@ const Profile = () => {
       >
         <Text style={styles.settingsButtonText}>Settings</Text>
       </TouchableOpacity>
-      <Text style={styles.text}>P</Text>
+      <Text style={styles.text}> Profile: {userName}</Text>
     </SafeAreaView>
   );
 };

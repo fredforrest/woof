@@ -15,13 +15,14 @@ import { useNavigation } from '@react-navigation/native';
 
 interface Room {
     id: string;
-    name: string; // Make sure 'name' ALWAYS exists in your Firestore docs or mark as optional: name?: string
+    name: string;
     description?: string;
-    lastMessageTimestamp?: any; // Consider using FirebaseFirestoreTypes.Timestamp if possible
+    lastMessageTimestamp?: any;
     lastMessageText?: string;
     // Add other fields if needed
   }
 
+  // --- ChatRooms Component ---
 const ChatRooms = ({ }) => { // Pass navigation prop
     const navigation = useNavigation<RootStackNavigationProp>();
     const [rooms, setRooms] = useState<Room[]>([]);
@@ -30,20 +31,22 @@ const ChatRooms = ({ }) => { // Pass navigation prop
 
 
   // --- Firestore Listener Setup ---
+  // 1. Use useEffect to set up a listener for Firestore collection changes
+  // 2. Use the 'onSnapshot' method to listen for real-time updates
+  // 3. Use the 'orderBy' method to sort the chat rooms by last message timestamp
   useEffect(() => {
     const subscriber = firestore()
       .collection('chatRooms')
       .orderBy('lastMessageTimestamp', 'desc')
       .onSnapshot(querySnapshot => {
         // 3. Type the fetchedRooms array using the Interface
-        //    THIS FIXES THE 'implicitly has an 'any[]' type' ERROR (ts(7005))
         const fetchedRooms: Room[] = [];
         if (querySnapshot) {
           querySnapshot.forEach(documentSnapshot => {
             fetchedRooms.push({
               id: documentSnapshot.id,
               ...documentSnapshot.data(),
-            } as Room); // Use 'as Room' to assure TypeScript the shape matches
+            } as Room); // Use 'as Room' to assure TypeScript it matches
           });
         }
 
@@ -88,12 +91,10 @@ const ChatRooms = ({ }) => { // Pass navigation prop
         <Text style={styles.roomName}>{item.name}</Text>
         <Text style={styles.roomDescription}>{item.description || 'No description'}</Text>
         {/* Optional: Display last message text or timestamp */}
-        {/* <Text style={styles.lastMessage}>{item.lastMessageText || ''}</Text> */}
+        <Text style={styles.lastMessage}>{item.lastMessageText || ''}</Text>
       </View>
       {/* Add Chevron Icon Here - Example using text, replace with real icon */}
       <Text style={styles.chevron}>{'>'}</Text>
-      {/* Example with react-native-vector-icons: */}
-      {/* <Icon name="chevron-forward-outline" size={24} color="#ccc" /> */}
     </TouchableOpacity>
   );
 

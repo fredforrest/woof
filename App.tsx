@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native';
+import { Platform, SafeAreaView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -12,6 +12,7 @@ import ProfileSettings from './app/screens/profilesettings';
 import { RootStackParamList } from './app/components/navigation/types';
 import CreateChat from './app/screens/createchat';
 import ChatScreen from './app/screens/chatscreen';
+import SplashScreen from 'react-native-splash-screen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -25,6 +26,7 @@ const App = () => {
     const [initializing, setInitializing] = useState(true);
     const [user, setUser] = useState(null);
 
+  
     // Handle user state changes
     function onAuthStateChanged(user) {
         setUser(user);
@@ -33,9 +35,16 @@ const App = () => {
 
     // Subscribe to authentication state changes
     useEffect(() => {
+
+        if (Platform.OS === 'android') {
+            SplashScreen.hide(); // Hide the splash screen after the app is loaded
+            }
+            
         const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
         return subscriber; // Unsubscribe on unmount
-    }, []);
+
+        
+    },  []);
 
     if (initializing) return null; // Optionally, show a loading indicator here
     
