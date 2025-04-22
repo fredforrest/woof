@@ -31,7 +31,7 @@ const HomeScreen = () => {
             />
 
             {/* Title */}
-            <Text style={styles.title}>Welcome to Woof Chat</Text>
+            <Text style={styles.title}>Welcome to Woof Social</Text>
             
              {/* User Name with Rounded Edge */}
              <View style={styles.userNameContainer}>
