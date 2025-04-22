@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
     const navigation = useNavigation<RootStackNavigationProp>();
+    const userName = auth().currentUser?.displayName || 'User';
 
     // Handle Logout
     // This function will be called when the user presses the "Log Out" button
@@ -30,7 +31,13 @@ const HomeScreen = () => {
             />
 
             {/* Title */}
-            <Text style={styles.title}>Welcome to Woof Chat!</Text>
+            <Text style={styles.title}>Welcome to Woof Chat</Text>
+            
+             {/* User Name with Rounded Edge */}
+             <View style={styles.userNameContainer}>
+                <Text style={styles.userName}>{userName}</Text>
+            </View>
+
 
             {/* Navigate to Profile */}
             <TouchableOpacity
@@ -67,8 +74,22 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 50,
+        marginBottom: 20,
         color: '#333',
+    },
+    userNameContainer: {
+        backgroundColor: '#E3F2FD', // Light blue background
+        paddingVertical: 5,
+        paddingHorizontal: 20,
+        borderRadius: 20, // Rounded edges
+        marginVertical: 20,
+        marginBottom: 30,
+    },
+    userName: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#2196F3',
+        marginVertical: 20,
     },
     button: {
         backgroundColor: '#2196F3', // Blue button
