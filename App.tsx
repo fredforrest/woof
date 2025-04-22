@@ -13,6 +13,7 @@ import { RootStackParamList } from './app/components/navigation/types';
 import CreateChat from './app/screens/createchat';
 import ChatScreen from './app/screens/chatscreen';
 import SplashScreen from 'react-native-splash-screen';
+import { StatusBar } from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -56,7 +57,8 @@ const App = () => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#2196F3' }}>
+            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
             <NavigationContainer>
                 <Stack.Navigator screenOptions={scrOptions}>
                     {user ? (
