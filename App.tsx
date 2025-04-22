@@ -50,33 +50,64 @@ const App = () => {
     if (initializing) return null; // Optionally, show a loading indicator here
     
 
-    const scrOptions = {
-        headerStyle: { backgroundColor: '#2196F3' },
-        headerTintColor: '#fff',
-        headerBackTitleVisible: false,
-    };
-
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#2196F3' }}>
-            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-            <NavigationContainer>
-                <Stack.Navigator screenOptions={scrOptions}>
-                    {user ? (
-                        <>
-                            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-                            <Stack.Screen name="ChatRooms" component={ChatRooms} options={{ headerShown: true }} />
-                            <Stack.Screen name="Profile" component={Profile} options={{ headerShown: true }} />
-                            <Stack.Screen name="Profile Settings" component={ProfileSettings} options={{ headerShown: true }} />
-                            <Stack.Screen name="Create Room" component={CreateChat} options={{ headerShown: true }} />
-                            <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true}} />
-                            <Stack.Screen name="LoginMenu" component={LoginMenu} options={{ headerShown: false }} />
-                        </>
-                    ) : (
-                        <Stack.Screen name="LoginMenu" component={LoginMenu} options={{ headerShown: false }} />
-                    )}
-                </Stack.Navigator>
-            </NavigationContainer>
-        </SafeAreaView>
+        <>
+            {/* Set the status bar color */}
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+                <NavigationContainer>
+                    <Stack.Navigator
+                        screenOptions={{
+                            headerStyle: { backgroundColor: '#FFFFFF' }, // White header background
+                            headerTintColor: '#000000', // Black text for header
+                            headerBackVisible: true,
+                        }}
+                    >
+                        {user ? (
+                            <>
+                                <Stack.Screen
+                                    name="Home"
+                                    component={HomeScreen}
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="ChatRooms"
+                                    component={ChatRooms}
+                                    options={{ headerShown: true, title: "Chat Rooms" }}
+                                />
+                                <Stack.Screen
+                                    name="Profile"
+                                    component={Profile}
+                                    options={{ headerShown: true }}
+                                />
+                                <Stack.Screen
+                                    name="Profile Settings"
+                                    component={ProfileSettings}
+                                    options={{ headerShown: true }}
+                                />
+                                <Stack.Screen
+                                    name="Create Room"
+                                    component={CreateChat}
+                                    options={{ headerShown: true }}
+                                />
+                                <Stack.Screen
+                                    name="ChatScreen"
+                                    component={ChatScreen}
+                                    options={{ headerShown: true, title: "Chat" }}
+                                    
+                                />
+                            </>
+                        ) : (
+                            <Stack.Screen
+                                name="LoginMenu"
+                                component={LoginMenu}
+                                options={{ headerShown: false }}
+                            />
+                        )}
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </SafeAreaView>
+        </>
     );
 };
 

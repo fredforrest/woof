@@ -11,6 +11,7 @@ const ProfileSettings = () => {
   const [photoURL, setPhotoURL] = useState(currentUser?.photoURL || '');
   const [loading, setLoading] = useState(false);
 
+  
   const handleSave = async () => {
     if (!userName.trim() || !dogType.trim()) {
       Alert.alert('Error', 'Please fill out all fields.');
@@ -45,6 +46,8 @@ const ProfileSettings = () => {
     }
   };
 
+  // Function to handle photo upload
+  // This function will be called when the user presses the "Upload Photo" button
   const handlePhotoUpload = async () => {
     try {
       const result = await ImagePicker.launchImageLibrary({
