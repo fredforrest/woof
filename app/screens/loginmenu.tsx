@@ -1,7 +1,9 @@
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import GoogleButton from '../buttons/googlebutton';
+import GoogleButton from '../components/buttons/googlebutton';
+import Separator from '../components/ui/separator';
+import EmailLogin from '../components/forms/emaillogin';
 
 const LoginMenu = () => {
   return (
@@ -10,15 +12,12 @@ const LoginMenu = () => {
         source={require('../images/wooflogo.jpg')}
         style={styles.logo}
       />
+      
+      <EmailLogin />
 
-      {/* Facebook Login Button */}
-      <TouchableOpacity style={[styles.button, styles.facebookButton]}>
-        <Text style={styles.buttonText}>Login with Facebook</Text>
-      </TouchableOpacity>
+      <Separator text="Or"/>
 
-      {/* Google Login Button */}
-      <GoogleButton/>
-
+      <GoogleButton />
     </SafeAreaView>
   );
 };
@@ -33,25 +32,10 @@ const styles = StyleSheet.create({
   logo: {
     width: 300,
     height: 300,
-    marginBottom: 40,
+    marginBottom: 20, // Reduced spacing below the logo
   },
-  button: {
-    width: '80%',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  facebookButton: {
-    backgroundColor: '#1877F2', // Facebook blue
-  },
-  googleButton: {
-    backgroundColor: '#DB4437', // Google red
-  },
-  buttonText: {
-    color: '#fff', // White text
-    fontSize: 16,
-    fontWeight: 'bold',
+  separator: {
+    marginVertical: 8, // Reduced spacing for the separator
   },
 });
 
