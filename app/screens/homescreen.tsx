@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
@@ -7,8 +7,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
     const navigation = useNavigation<RootStackNavigationProp>();
-    const userName = auth().currentUser?.displayName || 'User';
+    const [userName, setUserName] = useState('');
 
+    useEffect(() => {
+        const currentUser =auth().currentUser;
+        if (currentUser) {
+            setUserName(currentUser.displayName || 'DogLover69'); // Set the user name from Firebase
+        }
+    }, []);
     // Handle Logout
     // This function will be called when the user presses the "Log Out" button
     const handleLogout = async () => {
@@ -117,3 +123,5 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
+

@@ -11,6 +11,7 @@ const ProfileSettings = () => {
   const [photoURL, setPhotoURL] = useState(currentUser?.photoURL || '');
   const [loading, setLoading] = useState(false);
 
+
   
   const handleSave = async () => {
     if (!userName.trim() || !dogType.trim()) {
@@ -36,6 +37,8 @@ const ProfileSettings = () => {
         },
         { merge: true } // Merge with existing data
       );
+
+      await currentUser?.reload(); // Reload user to get updated profile
 
       Alert.alert('Success', 'Profile updated successfully!');
     } catch (error) {
