@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
@@ -7,7 +7,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
     const navigation = useNavigation<RootStackNavigationProp>();
+    const [userName, setUserName] = useState('');
 
+    useEffect(() => {
+        const currentUser =auth().currentUser;
+        if (currentUser) {
+            setUserName(currentUser.displayName || 'DogLover69'); // Set the user name from Firebase
+        }
+    }, []);
     // Handle Logout
     // This function will be called when the user presses the "Log Out" button
     const handleLogout = async () => {
@@ -30,7 +37,13 @@ const HomeScreen = () => {
             />
 
             {/* Title */}
-            <Text style={styles.title}>Welcome to Woof Chat!</Text>
+            <Text style={styles.title}>Welcome to Woof Social</Text>
+            
+             {/* User Name with Rounded Edge */}
+             <View style={styles.userNameContainer}>
+                <Text style={styles.userName}>{userName}</Text>
+            </View>
+
 
             {/* Navigate to Profile */}
             <TouchableOpacity
@@ -67,8 +80,22 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 50,
+        marginBottom: 20,
         color: '#333',
+    },
+    userNameContainer: {
+        backgroundColor: '#E3F2FD', // Light blue background
+        paddingVertical: 5,
+        paddingHorizontal: 20,
+        borderRadius: 20, // Rounded edges
+        marginVertical: 20,
+        marginBottom: 30,
+    },
+    userName: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#2196F3',
+        marginVertical: 20,
     },
     button: {
         backgroundColor: '#2196F3', // Blue button
@@ -96,3 +123,5 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
+
