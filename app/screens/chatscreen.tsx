@@ -19,10 +19,11 @@ import { useHeaderHeight } from '@react-navigation/elements';
 interface Message {
   id: string;
   text: string;
-  createdAt: any; // Firestore Timestamp (or null if using serverTimestamp pending write)
+  createdAt: any; // Firestore Timestamp
   userId: string;
   senderName: string;
   senderAvatarUrl?: string | null;
+  isTyping?: boolean; // Optional typing indicator
 }
 
 const ChatScreen = ({ route }: any) => {
@@ -33,6 +34,8 @@ const ChatScreen = ({ route }: any) => {
   const [isSending, setIsSending] = useState(false);
   const currentUser = auth().currentUser;
   const headerHeight = useHeaderHeight(); // Get header height for KAV offset
+  const isTyping = useRef(false); // Ref to track typing status
+  const isTypingTimeout = useRef<NodeJS.Timeout | null>(null); // Ref to manage typing timeout
 
   // Ref for the FlatList
   const flatListRef = useRef<FlatList>(null);
@@ -88,6 +91,33 @@ const ChatScreen = ({ route }: any) => {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
+
+  // --- Handle Typing ---
+  const handleTyping = (text: string) => {
+    setNewMessage(text);
+
+    if (!isTyping.current) {
+      isTyping.current = true;
+      // Notify others that the user is typing
+      firestore()
+        .collection('chatRooms')
+        .doc(roomId)
+        .update({ [`typing.${currentUser?.uid}`]: true });
+    }
+
+    if (isTypingTimeout.current) {
+      clearTimeout(isTypingTimeout.current);
+    }
+
+    isTypingTimeout.current = setTimeout(() => {
+      isTyping.current = false;
+      // Notify others that the user stopped typing
+      firestore()
+        .collection('chatRooms')
+        .doc(roomId)
+        .update({ [`typing.${currentUser?.uid}`]: false });
+    }, 2000); // Reset typing state after 2 seconds of inactivity
+  };
 
   // --- Callback Hook for Sending Messages ---
   const handleSendMessage = useCallback(async () => {
@@ -207,7 +237,7 @@ const ChatScreen = ({ route }: any) => {
           style={styles.input}
           placeholder="Type a message..."
           value={newMessage}
-          onChangeText={setNewMessage}
+          onChangeText={handleTyping}
           multiline
         />
         <Button title={isSending ? '...' : 'Send'} onPress={handleSendMessage} disabled={!newMessage.trim() || isSending} />
