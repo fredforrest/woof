@@ -170,6 +170,7 @@ const ChatScreen = ({ route }: any) => {
     ({ item }: { item: Message }) => {
       const isMyMessage = item.userId === currentUser?.uid;
 
+       // Format the timestamp
       let formattedTimestamp = '';
       if (item.createdAt && typeof item.createdAt.toDate === 'function') {
         try {
@@ -223,7 +224,7 @@ const ChatScreen = ({ route }: any) => {
         ref={flatListRef} // Attach the ref to the FlatList
         data={messages}
         renderItem={renderMessageItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id} 
         style={styles.messageList}
         ListEmptyComponent={
           !loading && messages.length === 0 ? (

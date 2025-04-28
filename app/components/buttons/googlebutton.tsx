@@ -29,7 +29,7 @@ export default function GoogleSignIn() {
 
       // Navigate to the Home screen after successful sign-in
       Alert.alert('Success', 'Signed in with Google!');
-      navigation.navigate('Home');
+      navigation.navigate("Home");
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       Alert.alert('Error', 'Failed to sign in with Google.');

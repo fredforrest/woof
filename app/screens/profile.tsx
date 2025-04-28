@@ -52,7 +52,7 @@ const Profile = () => {
       <View style={styles.infoBox}>
         <Text style={styles.infoText}>Username: {userName}</Text>
         <Text style={styles.infoText}>Email: {userEmail}</Text>
-        <Text style={styles.infoText}>Dog Type: {dogType}</Text>
+        <Text style={styles.infoText}>Dog Breed: {dogType}</Text>
       </View>
     </SafeAreaView>
   );
