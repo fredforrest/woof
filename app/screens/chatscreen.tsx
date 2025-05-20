@@ -12,18 +12,22 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { useHeaderHeight } from '@react-navigation/elements';
+import storage from '@react-native-firebase/storage';
+import { launchImageLibrary } from 'react-native-image-picker';
+
 
 interface Message {
   id: string;
   text: string;
-  createdAt: any; // Firestore Timestamp
+  createdAt: FirebaseFirestoreTypes.Timestamp;
   userId: string;
   senderName: string;
   senderAvatarUrl?: string | null;
   isTyping?: boolean; // Optional typing indicator
+  photoURL? : string; // URL for photo messages
 }
 
 const ChatScreen = ({ route }: any) => {
@@ -39,6 +43,26 @@ const ChatScreen = ({ route }: any) => {
 
   // Ref for the FlatList
   const flatListRef = useRef<FlatList>(null);
+
+  const pickAndSendPhoto = () => {
+  launchImageLibrary(
+    {
+      mediaType: 'photo',
+      quality: 0.7,
+    },
+    response => {
+      if (response.didCancel) return;
+      if (response.errorCode) {
+        Alert.alert('Error', 'Could not pick image.');
+        return;
+      }
+      const uri = response.assets && response.assets[0]?.uri;
+      if (uri) {
+        handleSendPhoto(uri);
+      }
+    }
+  );
+};
 
   // --- Effect Hook for Fetching Messages ---
   useEffect(() => {
@@ -165,44 +189,97 @@ const ChatScreen = ({ route }: any) => {
     }
   }, [newMessage, currentUser, roomId, isSending]);
 
+ const handleSendPhoto = useCallback(
+  async (uri: string) => {
+    if (!currentUser || isSending || !roomId) return;
+
+    setIsSending(true);
+
+    try {
+      const fileName = `${currentUser.uid}_${Date.now()}`;
+      const ref = storage().ref(`chatRooms/${roomId}/${fileName}`);
+      await ref.putFile(uri);
+      const downloadURL = await ref.getDownloadURL();
+
+      const senderName = currentUser.displayName || 'Unknown User';
+      const senderAvatarUrl = currentUser.photoURL || null;
+      const messageTimestamp = firestore.FieldValue.serverTimestamp();
+
+      const messageData = {
+        photoURL: downloadURL,
+        createdAt: messageTimestamp,
+        userId: currentUser.uid,
+        senderName: senderName,
+        senderAvatarUrl: senderAvatarUrl,
+      };
+
+      const roomRef = firestore().collection('chatRooms').doc(roomId);
+      const messagesRef = roomRef.collection('messages');
+      const batch = firestore().batch();
+
+      batch.set(messagesRef.doc(), messageData);
+      batch.update(roomRef, {
+        lastMessageTimestamp: messageTimestamp,
+        lastMessageText: '[Photo]',
+      });
+
+      await batch.commit();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send photo.');
+      console.error(error);
+    } finally {
+      setIsSending(false);
+    }
+  },
+  [currentUser, roomId, isSending]
+);
+
   // --- Render Function for Each Message Item ---
-  const renderMessageItem = useCallback(
-    ({ item }: { item: Message }) => {
-      const isMyMessage = item.userId === currentUser?.uid;
+const renderMessageItem = useCallback(
+  ({ item }: { item: Message }) => {
+    const isMyMessage = item.userId === currentUser?.uid;
 
-       // Format the timestamp
-      let formattedTimestamp = '';
-      if (item.createdAt && typeof item.createdAt.toDate === 'function') {
-        try {
-          const date = item.createdAt.toDate();
-          formattedTimestamp = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-        } catch (e) {
-          console.error('Error formatting date:', e);
-          formattedTimestamp = '...';
-        }
-      } else if (item.createdAt) {
-        formattedTimestamp = 'Pending...';
+    // Format the timestamp
+    let formattedTimestamp = '';
+    if (item.createdAt && typeof item.createdAt.toDate === 'function') {
+      try {
+        const date = item.createdAt.toDate();
+        formattedTimestamp = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      } catch (e) {
+        console.error('Error formatting date:', e);
+        formattedTimestamp = '...';
       }
+    } else if (item.createdAt) {
+      formattedTimestamp = 'Pending...';
+    }
 
-      return (
-        <View style={[styles.messageRow, isMyMessage ? styles.myMessageRow : styles.theirMessageRow]}>
-          {!isMyMessage && (
+       return (
+      <View style={[styles.messageRow, isMyMessage ? styles.myMessageRow : styles.theirMessageRow]}>
+        {!isMyMessage && (
+          <Image
+            source={item.senderAvatarUrl ? { uri: item.senderAvatarUrl } : require('../images/default-avatar.png')}
+            style={styles.avatar}
+          />
+        )}
+        <View style={[styles.messageBubble, isMyMessage ? styles.myMessageBubble : styles.theirMessageBubble]}>
+          {!isMyMessage && <Text style={styles.senderName}>{item.senderName || 'User'}</Text>}
+          {item.photoURL ? (
             <Image
-              source={item.senderAvatarUrl ? { uri: item.senderAvatarUrl } : require('../images/default-avatar.png')}
-              style={styles.avatar}
+              source={{ uri: item.photoURL }}
+              style={{ width: 180, height: 180, borderRadius: 10, marginBottom: 5 }}
+              resizeMode="cover"
             />
-          )}
-          <View style={[styles.messageBubble, isMyMessage ? styles.myMessageBubble : styles.theirMessageBubble]}>
-            {!isMyMessage && <Text style={styles.senderName}>{item.senderName || 'User'}</Text>}
+          ) : (
             <Text style={styles.messageText}>{item.text}</Text>
-            <Text style={styles.messageTime}>{formattedTimestamp}</Text>
-          </View>
-          {isMyMessage && <View style={styles.myMessageSpacer} />}
+          )}
+          <Text style={styles.messageTime}>{formattedTimestamp}</Text>
         </View>
-      );
-    },
-    [currentUser]
-  );
+        {isMyMessage && <View style={styles.myMessageSpacer} />}
+      </View>
+    );
+  },
+  [currentUser]
+);
 
   // --- Loading State ---
   if (loading) {
@@ -234,15 +311,16 @@ const ChatScreen = ({ route }: any) => {
         inverted={true} // Keep true for chat UIs
       />
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          value={newMessage}
-          onChangeText={handleTyping}
-          multiline
-        />
-        <Button title={isSending ? '...' : 'Send'} onPress={handleSendMessage} disabled={!newMessage.trim() || isSending} />
-      </View>
+  <Button title="📷" onPress={pickAndSendPhoto} disabled={isSending} />
+  <TextInput
+    style={styles.input}
+    placeholder="Type a message..."
+    value={newMessage}
+    onChangeText={handleTyping}
+    multiline
+  />
+  <Button title={isSending ? '...' : 'Send'} onPress={handleSendMessage} disabled={!newMessage.trim() || isSending} />
+</View>
     </KeyboardAvoidingView>
   );
 };
