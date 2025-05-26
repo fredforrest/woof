@@ -10,7 +10,7 @@ const HomeScreen = () => {
     const [userName, setUserName] = useState('');
 
     useEffect(() => {
-        const currentUser =auth().currentUser;
+        const currentUser = auth().currentUser;
         if (currentUser) {
             setUserName(currentUser.displayName || 'DogLover69'); // Set the user name from Firebase
         }
