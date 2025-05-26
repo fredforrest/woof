@@ -12,23 +12,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Set up Java Development Kit (JDK) 11 using Zulu distribution
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '11'
 
+      # Step 3: Install JS dependencies. Uses npm ci instead 'install' for CI/CD pipelines
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Make gradlew executable (required for Linux runners)
       - name: Change directory to android and make gradlew executable
         working-directory: android
         run: chmod +x gradlew
 
+      # Step 5: Build the debug APK using Gradle
       - name: Build Debug APK
         working-directory: android
         run: ./gradlew assembleDebug
 
+      # Step 6: Upload the generated APK as a workflow artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
