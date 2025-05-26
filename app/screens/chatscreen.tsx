@@ -73,6 +73,7 @@ const ChatScreen = ({ route }: any) => {
       return;
     }
 
+    // fetch last 50 messages from Firestore and listen for new messages
     const messagesListener = firestore()
       .collection('chatRooms')
       .doc(roomId)
