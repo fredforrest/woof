@@ -61,15 +61,11 @@ Have ideas or improvements? Open an issue or submit a pull request!
 
 This project is licensed under the MIT License.
 
+![Screenshot 1](./assets/Screenshot_2025-05-29_at_11.35.04.png)
+![Screenshot 2](./assets/Screenshot_2025-05-29_at_11.35.20.png)
+![Screenshot 3](./assets/Screenshot_2025-05-29_at_11.35.56.png)
+![Screenshot 4](./assets/Screenshot_2025-05-29_at_11.36.20.png)
+![Screenshot 5](./assets/Screenshot_2025-05-29_at_11.36.51.png)
+![Screenshot 6](./assets/Screenshot_2025-05-29_at_11.37.50.png)
 
-![Screenshot 2025-05-29 at 11.35.04.png](attachment:52792372-21ad-489f-8a5e-fd5d4cd89a7d:Screenshot_2025-05-29_at_11.35.04.png)
 
-![Screenshot 2025-05-29 at 11.35.20.png](attachment:36c6cf3a-c375-40a7-a221-3c64938f463d:Screenshot_2025-05-29_at_11.35.20.png)
-
-![Screenshot 2025-05-29 at 11.35.56.png](attachment:83cff1cb-94fa-42bf-9edc-f2f7a55dcc67:Screenshot_2025-05-29_at_11.35.56.png)
-
-![Screenshot 2025-05-29 at 11.36.20.png](attachment:31559d7b-b18c-40ee-a308-e5fadf61ca4f:Screenshot_2025-05-29_at_11.36.20.png)
-
-![Screenshot 2025-05-29 at 11.36.51.png](attachment:dc48b091-59d6-4a21-b20d-7b59f24e7f75:Screenshot_2025-05-29_at_11.36.51.png)
-
-![Screenshot 2025-05-29 at 11.37.50.png](attachment:23514493-9146-49b3-a49a-1b4feebfd9c9:Screenshot_2025-05-29_at_11.37.50.png)
