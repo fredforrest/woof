@@ -61,11 +61,10 @@ Have ideas or improvements? Open an issue or submit a pull request!
 
 This project is licensed under the MIT License.
 
-![Screenshot 1](./assets/Screenshot_2025-05-29_at_11.35.04.png)
-![Screenshot 2](./assets/Screenshot_2025-05-29_at_11.35.20.png)
-![Screenshot 3](./assets/Screenshot_2025-05-29_at_11.35.56.png)
-![Screenshot 4](./assets/Screenshot_2025-05-29_at_11.36.20.png)
-![Screenshot 5](./assets/Screenshot_2025-05-29_at_11.36.51.png)
-![Screenshot 6](./assets/Screenshot_2025-05-29_at_11.37.50.png)
+(./assets/Screenshot_2025-05-29_at_11.35.04.png)
+(./assets/Screenshot_2025-05-29_at_11.35.20.png)
+(./assets/Screenshot_2025-05-29_at_11.36.20.png)
+(./assets/Screenshot_2025-05-29_at_11.36.51.png)
+(./assets/Screenshot_2025-05-29_at_11.37.50.png)
 
 
