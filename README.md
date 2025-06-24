@@ -35,7 +35,7 @@ npm install
 
     Create a Firebase project at Firebase Console.
 
-    Enable Authentication (Google, Email.
+    Enable Authentication (Google, Email.)
 
     Set up Cloud Firestore and Storage.
 
