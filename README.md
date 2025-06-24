@@ -60,13 +60,27 @@ Have ideas or improvements? Open an issue or submit a pull request!
 📜 License
 
 This project is licensed under the MIT License.
+## 🖼️ Screenshots
 
-![Screenshot 1](assets/Screenshot_2025-05-29_at_11.35.04.png)
-![Screenshot 2](assets/Screenshot_2025-05-29_at_11.35.20.png)
-![Screenshot 3](assets/Screenshot_2025-05-29_at_11.35.56.png)
-![Screenshot 4](assets/Screenshot_2025-05-29_at_11.36.20.png)
-![Screenshot 5](assets/Screenshot_2025-05-29_at_11.36.51.png)
-![Screenshot 6](assets/Screenshot_2025-05-29_at_11.37.50.png)
+<p align="center">
+  <img src="./assets/screenshot1.png" width="250" style="margin: 10px;"/>
+  <img src="./assets/screenshot2.png" width="250" style="margin: 10px;"/>
+</p>
+
+<p align="center">
+  <img src="./assets/screenshot3.png" width="250" style="margin: 10px;"/>
+  <img src="./assets/screenshot4.png" width="250" style="margin: 10px;"/>
+</p>
+
+<p align="center">
+  <img src="./assets/screenshot5.png" width="250" style="margin: 10px;"/>
+  <img src="./assets/screenshot6.png" width="250" style="margin: 10px;"/>
+</p>
+
+<p align="center">
+  <img src="./assets/screenshot7.png" width="250" style="margin: 10px;"/>
+</p>
+
 
 
 
