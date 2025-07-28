@@ -36,6 +36,9 @@ const ChatScreen = ({ route }: any) => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.DocumentSnapshot | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const currentUser = auth().currentUser;
   const headerHeight = useHeaderHeight(); // Get header height for KAV offset
   const isTyping = useRef(false); // Ref to track typing status
@@ -73,42 +76,88 @@ const ChatScreen = ({ route }: any) => {
       return;
     }
 
-    // fetch last 50 messages from Firestore and listen for new messages
-    const messagesListener = firestore()
-      .collection('chatRooms')
-      .doc(roomId)
-      .collection('messages')
-      .orderBy('createdAt', 'desc')
-      .limit(50)
-      .onSnapshot(
-        querySnapshot => {
-          const fetchedMessages: Message[] = [];
-          querySnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data?.createdAt) {
-              fetchedMessages.push({
-                id: doc.id,
-                ...data,
-              } as Message);
-            }
-          });
+    let messagesListener: (() => void) | null = null;
 
-          setMessages(fetchedMessages.reverse()); // Reverse for chronological order
-          if (loading) setLoading(false);
-        },
-        error => {
-          console.error(`Error fetching messages for room ${roomId}: `, error);
-          if ((error as any).code === 'permission-denied') {
-            Alert.alert("Permission Error", "You don't have permission to view these messages.");
-          } else {
-            Alert.alert("Error", "Could not load messages.");
+    const setupMessagesListener = async () => {
+      try {
+        // Initial fetch of last 50 messages
+        const initialSnapshot = await firestore()
+          .collection('chatRooms')
+          .doc(roomId)
+          .collection('messages')
+          .orderBy('createdAt', 'desc')
+          .limit(50)
+          .get();
+
+        const fetchedMessages: Message[] = [];
+        initialSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data?.createdAt) {
+            fetchedMessages.push({
+              id: doc.id,
+              ...data,
+            } as Message);
           }
-          setLoading(false);
-        }
-      );
+        });
 
-    return () => messagesListener();
-  }, [roomId, loading]);
+        setMessages(fetchedMessages.reverse());
+        setLastVisible(initialSnapshot.docs[initialSnapshot.docs.length - 1]);
+        setHasMore(initialSnapshot.size === 50);
+        setLoading(false);
+
+        // Set up real-time listener for new messages only
+        if (initialSnapshot.docs.length > 0) {
+          messagesListener = firestore()
+            .collection('chatRooms')
+            .doc(roomId)
+            .collection('messages')
+            .where('createdAt', '>', initialSnapshot.docs[0].data().createdAt)
+            .orderBy('createdAt', 'desc')
+            .onSnapshot(
+              newSnapshot => {
+                const newMessages: Message[] = [];
+                newSnapshot.forEach(doc => {
+                  const data = doc.data();
+                  if (data?.createdAt) {
+                    newMessages.push({
+                      id: doc.id,
+                      ...data,
+                    } as Message);
+                  }
+                });
+                
+                if (newMessages.length > 0) {
+                  setMessages(prev => {
+                    const existingIds = new Set(prev.map(msg => msg.id));
+                    const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+                    return [...prev, ...uniqueNewMessages.reverse()];
+                  });
+                }
+              },
+              error => {
+                console.error(`Error listening for new messages: `, error);
+              }
+            );
+        }
+      } catch (error) {
+        console.error(`Error fetching messages for room ${roomId}: `, error);
+        if ((error as any).code === 'permission-denied') {
+          Alert.alert("Permission Error", "You don't have permission to view these messages.");
+        } else {
+          Alert.alert("Error", "Could not load messages.");
+        }
+        setLoading(false);
+      }
+    };
+
+    setupMessagesListener();
+
+    return () => {
+      if (messagesListener) {
+        messagesListener();
+      }
+    };
+  }, [roomId]);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
@@ -235,6 +284,50 @@ const ChatScreen = ({ route }: any) => {
   [currentUser, roomId, isSending]
 );
 
+  // --- Load More Messages Function ---
+  const loadMoreMessages = async () => {
+    if (!roomId || !lastVisible || loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    
+    try {
+      const snapshot = await firestore()
+        .collection('chatRooms')
+        .doc(roomId)
+        .collection('messages')
+        .orderBy('createdAt', 'desc')
+        .startAfter(lastVisible)
+        .limit(50)
+        .get();
+
+      const fetchedMessages: Message[] = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data?.createdAt) {
+          fetchedMessages.push({
+            id: doc.id,
+            ...data,
+          } as Message);
+        }
+      });
+
+      if (fetchedMessages.length > 0) {
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(msg => msg.id));
+          const uniqueNewMessages = fetchedMessages.filter(msg => !existingIds.has(msg.id));
+          return [...uniqueNewMessages.reverse(), ...prev];
+        });
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      }
+      
+      setHasMore(snapshot.size === 50);
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   // --- Render Function for Each Message Item ---
 const renderMessageItem = useCallback(
   ({ item }: { item: Message }) => {
@@ -258,8 +351,15 @@ const renderMessageItem = useCallback(
       <View style={[styles.messageRow, isMyMessage ? styles.myMessageRow : styles.theirMessageRow]}>
         {!isMyMessage && (
           <Image
-            source={item.senderAvatarUrl ? { uri: item.senderAvatarUrl } : require('../images/default-avatar.png')}
+            source={
+              item.senderAvatarUrl && item.senderAvatarUrl.startsWith('http') 
+                ? { uri: item.senderAvatarUrl } 
+                : require('../images/default-avatar.png')
+            }
             style={styles.avatar}
+            onError={() => {
+              console.log('Avatar failed to load, using default');
+            }}
           />
         )}
         <View style={[styles.messageBubble, isMyMessage ? styles.myMessageBubble : styles.theirMessageBubble]}>
@@ -309,7 +409,17 @@ const renderMessageItem = useCallback(
             <Text style={styles.emptyText}>No messages yet. Start the conversation!</Text>
           ) : null
         }
+        ListHeaderComponent={loadingMore ? <ActivityIndicator style={{ margin: 10 }} /> : null}
         inverted={true} // Keep true for chat UIs
+        onScroll={({ nativeEvent }) => {
+          const { contentOffset, contentSize, layoutMeasurement } = nativeEvent;
+          const isAtTop = contentOffset.y >= contentSize.height - layoutMeasurement.height - 100;
+          
+          if (isAtTop && hasMore && !loadingMore) {
+            loadMoreMessages();
+          }
+        }}
+        scrollEventThrottle={400}
       />
       <View style={styles.inputContainer}>
   <Button title="📷" onPress={pickAndSendPhoto} disabled={isSending} />

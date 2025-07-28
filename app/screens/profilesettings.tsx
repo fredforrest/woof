@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import * as ImagePicker from 'react-native-image-picker';
+import { updateUserAvatarInMessages, cleanupOldAvatars } from '../utils/avatarMigration';
 
 const ProfileSettings = () => {
   const currentUser = auth().currentUser;
@@ -10,6 +12,7 @@ const ProfileSettings = () => {
   const [dogType, setDogType] = useState(''); // Add state for Dog Type
   const [photoURL, setPhotoURL] = useState(currentUser?.photoURL || '');
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
 
   
@@ -22,6 +25,8 @@ const ProfileSettings = () => {
     setLoading(true);
 
     try {
+      const oldAvatarURL = currentUser?.photoURL;
+
       // Update Firebase Authentication profile
       await currentUser?.updateProfile({
         displayName: userName,
@@ -40,6 +45,21 @@ const ProfileSettings = () => {
 
       await currentUser?.reload(); // Reload user to get updated profile
 
+      // If avatar was changed, update all existing messages and cleanup old avatars
+      if (photoURL && photoURL !== oldAvatarURL) {
+        // Update avatar in all existing messages (runs in background)
+        updateUserAvatarInMessages(photoURL).catch(error => {
+          console.error('Error updating messages with new avatar:', error);
+        });
+
+        // Clean up old avatar files (runs in background)
+        if (oldAvatarURL) {
+          cleanupOldAvatars(photoURL).catch(error => {
+            console.error('Error cleaning up old avatars:', error);
+          });
+        }
+      }
+
       Alert.alert('Success', 'Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -49,13 +69,17 @@ const ProfileSettings = () => {
     }
   };
 
-  // Function to handle photo upload
-  // This function will be called when the user presses the "Upload Photo" button
+  // Function to handle photo upload to Firebase Storage
   const handlePhotoUpload = async () => {
+    if (!currentUser) {
+      Alert.alert('Error', 'User not authenticated.');
+      return;
+    }
+
     try {
       const result = await ImagePicker.launchImageLibrary({
         mediaType: 'photo',
-        quality: 1,
+        quality: 0.8,
       });
   
       if (result.didCancel) {
@@ -71,12 +95,41 @@ const ProfileSettings = () => {
   
       if (result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
-        setPhotoURL(selectedImage.uri || '');
-        Alert.alert('Success', 'Photo uploaded successfully!');
+        const localUri = selectedImage.uri;
+
+        if (!localUri) {
+          Alert.alert('Error', 'No image selected.');
+          return;
+        }
+
+        setUploadingPhoto(true);
+
+        try {
+          // Create a unique filename for the avatar
+          const fileName = `avatar_${currentUser.uid}_${Date.now()}.jpg`;
+          const storageRef = storage().ref(`avatars/${fileName}`);
+
+          // Upload the image to Firebase Storage
+          await storageRef.putFile(localUri);
+
+          // Get the download URL
+          const downloadURL = await storageRef.getDownloadURL();
+
+          // Update the local state with the permanent URL
+          setPhotoURL(downloadURL);
+
+          Alert.alert('Success', 'Profile photo uploaded successfully!');
+        } catch (uploadError) {
+          console.error('Error uploading photo to Firebase Storage:', uploadError);
+          Alert.alert('Error', 'Failed to upload photo to storage.');
+        } finally {
+          setUploadingPhoto(false);
+        }
       }
     } catch (error) {
-      console.error('Error uploading photo:', error);
-      Alert.alert('Error', 'Something went wrong while uploading the photo.');
+      console.error('Error with image picker:', error);
+      Alert.alert('Error', 'Something went wrong while selecting the photo.');
+      setUploadingPhoto(false);
     }
   };
 
@@ -89,8 +142,14 @@ const ProfileSettings = () => {
       ) : (
         <Text style={styles.noImageText}>No Profile Picture</Text>
       )}
-      <TouchableOpacity style={styles.uploadButton} onPress={handlePhotoUpload}>
-        <Text style={styles.uploadButtonText}>Upload Photo</Text>
+      <TouchableOpacity 
+        style={[styles.uploadButton, uploadingPhoto && styles.disabledButton]} 
+        onPress={handlePhotoUpload}
+        disabled={uploadingPhoto}
+      >
+        <Text style={styles.uploadButtonText}>
+          {uploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+        </Text>
       </TouchableOpacity>
 
       <Text style={styles.label}>User Name</Text>
@@ -149,6 +208,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     marginBottom: 20,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
   uploadButtonText: {
     color: '#FFF',

@@ -49,7 +49,7 @@ const App = () => {
 
     if (initializing) return null; // Optionally, show a loading indicator here
     
-
+ 
     return (
         <>
             {/* Set the status bar color */}
