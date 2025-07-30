@@ -20,7 +20,7 @@ const Profile = () => {
     const fetchDogType = async () => {
       try {
         const userDoc = await firestore().collection('users').doc(currentUser?.uid).get();
-        if (userDoc.exists) {
+        if (userDoc.exists()) {
           const userData = userDoc.data();
           setDogType(userData?.dogType || 'Alien'); // Set dogType from Firestore
         }
