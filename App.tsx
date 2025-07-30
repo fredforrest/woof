@@ -3,6 +3,7 @@ import { Platform, SafeAreaView } from 'react-native';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import auth from '@react-native-firebase/auth';
 import LoginMenu from './app/screens/loginmenu';
 import HomeScreen from './app/screens/homescreen';
@@ -63,11 +64,12 @@ const App = () => {
         <>
             {/* Set the status bar color */}
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-                <NavigationContainer 
-                    ref={navigationRef}
-                    onStateChange={NavigationSecurity.onNavigationStateChange}
-                >
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+                    <NavigationContainer 
+                        ref={navigationRef}
+                        onStateChange={NavigationSecurity.onNavigationStateChange}
+                    >
                     <Stack.Navigator
                         screenOptions={{
                             headerStyle: { backgroundColor: '#FFFFFF' }, // White header background
@@ -124,6 +126,7 @@ const App = () => {
                     </Stack.Navigator>
                 </NavigationContainer>
             </SafeAreaView>
+            </GestureHandlerRootView>
         </>
     );
 };

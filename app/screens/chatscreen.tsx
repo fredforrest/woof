@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,12 @@ import {
   Image,
   Alert,
   AppState,
+  TouchableOpacity,
 } from 'react-native';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useNavigation } from '@react-navigation/native';
 import storage from '@react-native-firebase/storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { 
@@ -44,7 +46,8 @@ interface Message {
 }
 
 const ChatScreen = ({ route }: any) => {
-  const { roomId } = route.params; // Get roomId from navigation parameters
+  const { roomId, roomName } = route.params; // Get roomId and roomName from navigation parameters
+  const navigation = useNavigation();
   
   // Security: Validate roomId
   if (!validateRoomId(roomId)) {
@@ -70,6 +73,104 @@ const ChatScreen = ({ route }: any) => {
 
   // Ref for the FlatList
   const flatListRef = useRef<FlatList>(null);
+
+  // --- Handle room deletion from within chat ---
+  const handleDeleteRoomFromChat = async () => {
+    if (!currentUser) return;
+
+    try {
+      // Check if user is the room creator
+      const roomDoc = await firestore().collection('chatRooms').doc(roomId).get();
+      
+      if (!roomDoc.exists) {
+        Alert.alert('Error', 'Room not found.');
+        return;
+      }
+
+      const roomData = roomDoc.data();
+      
+      if (roomData?.createdBy !== currentUser.uid) {
+        Alert.alert('Permission Denied', 'Only the room creator can delete this room.');
+        return;
+      }
+
+      Alert.alert(
+        'Delete Room',
+        `Are you sure you want to delete "${roomName}"? This action cannot be undone and will delete all messages.`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                // Delete all messages first
+                const messagesRef = firestore()
+                  .collection('chatRooms')
+                  .doc(roomId)
+                  .collection('messages');
+                
+                const messagesSnapshot = await messagesRef.get();
+                const batch = firestore().batch();
+                
+                messagesSnapshot.docs.forEach(doc => {
+                  batch.delete(doc.ref);
+                });
+                
+                // Delete the room document
+                const roomRef = firestore().collection('chatRooms').doc(roomId);
+                batch.delete(roomRef);
+                
+                await batch.commit();
+                
+                Alert.alert('Success', 'Room deleted successfully.');
+                navigation.goBack(); // Navigate back to chat rooms
+              } catch (error) {
+                console.error('Error deleting room:', error);
+                Alert.alert('Error', 'Failed to delete room. Please try again.');
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error checking room ownership:', error);
+      Alert.alert('Error', 'Could not check room permissions.');
+    }
+  };
+
+  // --- Configure navigation header with delete button ---
+  useLayoutEffect(() => {
+    const checkRoomOwnership = async () => {
+      if (!currentUser) return;
+
+      try {
+        const roomDoc = await firestore().collection('chatRooms').doc(roomId).get();
+        const roomData = roomDoc.data();
+        
+        // Only show delete button if user is room creator
+        if (roomData?.createdBy === currentUser.uid) {
+          navigation.setOptions({
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={handleDeleteRoomFromChat}
+                style={styles.deleteHeaderButton}
+              >
+                <Text style={styles.deleteHeaderButtonText}>🗑️</Text>
+              </TouchableOpacity>
+            ),
+          });
+        }
+      } catch (error) {
+        console.error('Error checking room ownership:', error);
+      }
+    };
+
+    checkRoomOwnership();
+  }, [navigation, roomId, currentUser]);
 
   // Security: Clear sensitive data when app goes to background
   useEffect(() => {
@@ -667,6 +768,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  deleteHeaderButton: {
+    padding: 8,
+    marginRight: 10,
+  },
+  deleteHeaderButtonText: {
+    fontSize: 18,
   },
 });
 

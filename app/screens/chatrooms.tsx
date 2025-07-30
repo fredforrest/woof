@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
+  Alert,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -16,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import JoinRoomComponent from '../components/ui/JoinRoomComponent';
 import JoinRequestComponent from '../components/ui/JoinRequestComponent';
 import JoinRequestNotifications from '../components/ui/JoinRequestNotifications';
+import { Swipeable } from 'react-native-gesture-handler';
 
 
 interface Room {
@@ -142,12 +144,83 @@ const ChatRooms = ({ }) => { // Pass navigation prop
     onRefresh();
   };
 
+  // --- Handle room deletion ---
+  const handleDeleteRoom = (room: Room) => {
+    if (!currentUser) return;
+
+    // Only allow room creators to delete rooms
+    if (room.createdBy !== currentUser.uid) {
+      Alert.alert('Permission Denied', 'Only the room creator can delete this room.');
+      return;
+    }
+
+    Alert.alert(
+      'Delete Room',
+      `Are you sure you want to delete "${room.name}"? This action cannot be undone and will delete all messages.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Delete all messages first
+              const messagesRef = firestore()
+                .collection('chatRooms')
+                .doc(room.id)
+                .collection('messages');
+              
+              const messagesSnapshot = await messagesRef.get();
+              const batch = firestore().batch();
+              
+              messagesSnapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+              });
+              
+              // Delete the room document
+              const roomRef = firestore().collection('chatRooms').doc(room.id);
+              batch.delete(roomRef);
+              
+              await batch.commit();
+              
+              Alert.alert('Success', 'Room deleted successfully.');
+            } catch (error) {
+              console.error('Error deleting room:', error);
+              Alert.alert('Error', 'Failed to delete room. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // --- Render delete button for swipe ---
+  const renderDeleteButton = (room: Room) => {
+    // Only show delete button for room creators
+    if (!currentUser || room.createdBy !== currentUser.uid) {
+      return null;
+    }
+
+    return (
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDeleteRoom(room)}
+      >
+        <Text style={styles.deleteButtonText}>🗑️</Text>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    );
+  };
+
   // --- Render Item for FlatList ---
   const renderItem = ({ item }: { item: Room}) => {
     const roomStatus = getRoomStatus(item);
     const hasAccess = canAccessRoom(item);
     
-    return (
+    const roomContent = (
       <TouchableOpacity
         style={[styles.row, item.isPrivate && styles.privateRow]}
         onPress={() => handleRoomPress(item)}
@@ -193,6 +266,17 @@ const ChatRooms = ({ }) => { // Pass navigation prop
         </Text>
       </TouchableOpacity>
     );
+
+    // Only wrap with Swipeable if user is the room creator
+    if (currentUser && item.createdBy === currentUser.uid) {
+      return (
+        <Swipeable renderRightActions={() => renderDeleteButton(item)}>
+          {roomContent}
+        </Swipeable>
+      );
+    }
+
+    return roomContent;
   };
 
   if (loading) {
@@ -508,6 +592,19 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  deleteButton: {
+    backgroundColor: '#F44336',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+  },
+  deleteButtonText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 
