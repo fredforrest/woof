@@ -13,7 +13,7 @@ export const validateMessage = (text: string): boolean => {
 
 export const sanitizeInput = (input: string): string => {
   if (!input || typeof input !== 'string') return '';
-  return input.trim().replace(/[<>]/g, ''); // Basic XSS prevention
+  return input.replace(/[<>]/g, ''); // Basic XSS prevention - don't trim here
 };
 
 export const validateRoomId = (roomId: any): boolean => {
@@ -173,11 +173,14 @@ export const logSecurityEvent = async (event: string, details?: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
+    // Sanitize details to remove undefined values (Firestore doesn't support them)
+    const sanitizedDetails = details ? sanitizeForFirestore(details) : {};
+
     await firestore().collection('audit_logs').add({
       event,
       userId: user.uid,
       timestamp: firestore.FieldValue.serverTimestamp(),
-      details: details || {},
+      details: sanitizedDetails,
       userAgent: 'React Native App', // Could be more specific
     });
   } catch (error) {
@@ -201,6 +204,34 @@ export const sanitizeForLogging = (data: any): any => {
   }
   
   return sanitized;
+};
+
+/**
+ * Sanitize data for Firestore (remove undefined values and null objects)
+ */
+export const sanitizeForFirestore = (data: any): any => {
+  if (data === null || data === undefined) {
+    return null;
+  }
+  
+  if (Array.isArray(data)) {
+    return data.map(item => sanitizeForFirestore(item)).filter(item => item !== undefined);
+  }
+  
+  if (typeof data === 'object') {
+    const sanitized: any = {};
+    
+    for (const key in data) {
+      const value = data[key];
+      if (value !== undefined) {
+        sanitized[key] = sanitizeForFirestore(value);
+      }
+    }
+    
+    return sanitized;
+  }
+  
+  return data;
 };
 
 /**

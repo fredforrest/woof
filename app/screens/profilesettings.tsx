@@ -29,8 +29,8 @@ const ProfileSettings = () => {
       const user = getCurrentUser();
       
       // Security: Validate and sanitize inputs
-      const sanitizedUserName = sanitizeInput(userName);
-      const sanitizedDogType = sanitizeInput(dogType);
+      const sanitizedUserName = sanitizeInput(userName).trim();
+      const sanitizedDogType = sanitizeInput(dogType).trim();
       
       if (!sanitizedUserName.trim() || sanitizedUserName.length > 50) {
         Alert.alert('Error', 'Please enter a valid name (1-50 characters).');
@@ -197,7 +197,7 @@ const ProfileSettings = () => {
           style={styles.input}
           placeholder="Enter your user name"
           value={userName}
-          onChangeText={(text) => setUserName(sanitizeInput(text))}
+          onChangeText={setUserName}
           maxLength={50}
         />
 
@@ -206,9 +206,11 @@ const ProfileSettings = () => {
           style={styles.input}
           placeholder="Enter your dog's breed or type"
           value={dogType}
-          onChangeText={(text) => setDogType(sanitizeInput(text))}
+          onChangeText={setDogType}
           maxLength={30}
-        />      <Button title={loading ? 'Saving...' : 'Save'} onPress={handleSave} disabled={loading} />
+        />
+        
+        <Button title={loading ? 'Saving...' : 'Save'} onPress={handleSave} disabled={loading} />
     </View>
   );
 };

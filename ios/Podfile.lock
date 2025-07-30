@@ -3016,6 +3016,28 @@ PODS:
     - Firebase/Storage (= 11.12.0)
     - React-Core
     - RNFBApp
+  - RNGestureHandler (2.27.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-FabricComponents
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNGoogleSignin (13.2.0):
     - DoubleConversion
     - glog
@@ -3161,6 +3183,7 @@ DEPENDENCIES:
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -3338,6 +3361,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/firestore"
   RNFBStorage:
     :path: "../node_modules/@react-native-firebase/storage"
+  RNGestureHandler:
+    :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
   RNScreens:
@@ -3441,6 +3466,7 @@ SPEC CHECKSUMS:
   RNFBAuth: 5098e2f5e1341d9c06994ceeb216093edb67c749
   RNFBFirestore: ca9fa0d32f56cdaceff22b0addcb77448d1c565c
   RNFBStorage: 65958ae20aa398d35c246cd2d12b985937d12219
+  RNGestureHandler: 64139a6aa433bba9bf4c6d5fe5c3a27d9ec33b8d
   RNGoogleSignin: 1a215139c537bb0430abdb9ff9a8e437578e515d
   RNScreens: 04304337930029a5d0db297b22eb0f07adc31a2c
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
