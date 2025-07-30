@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 import { getCurrentUser, canUserAccessRoom, logSecurityEvent, handleSecureError } from '../utils/security';
+import { useNotifications } from './useNotifications';
 
 export interface Message {
   id: string;
@@ -21,6 +22,7 @@ interface UseMessagesReturn {
   hasMore: boolean;
   loadMoreMessages: () => Promise<void>;
   flatListRef: React.RefObject<any>;
+  roomName: string;
 }
 
 export const useMessages = (roomId: string): UseMessagesReturn => {
@@ -29,7 +31,11 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.DocumentSnapshot | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [roomName, setRoomName] = useState<string>('');
   const flatListRef = useRef<any>(null);
+
+  // Initialize notifications for this room
+  const { showMessageNotification, cancelRoomNotifications, appState } = useNotifications(roomId);
 
   // Load more messages function
   const loadMoreMessages = async () => {
@@ -82,6 +88,13 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
     }
   }, [messages]);
 
+  // Clear notifications when entering room (app becomes active)
+  useEffect(() => {
+    if (appState === 'active' && roomId) {
+      cancelRoomNotifications(roomId);
+    }
+  }, [appState, roomId, cancelRoomNotifications]);
+
   // Main messages effect
   useEffect(() => {
     if (!roomId || typeof roomId !== 'string') {
@@ -103,6 +116,13 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
           Alert.alert('Access Denied', 'You do not have permission to view this chat.');
           setLoading(false);
           return;
+        }
+
+        // Fetch room details for notifications
+        const roomDoc = await firestore().collection('chatRooms').doc(roomId).get();
+        if (roomDoc.exists()) {
+          const roomData = roomDoc.data();
+          setRoomName(roomData?.name || 'Unknown Room');
         }
 
         // Log security event
@@ -158,6 +178,12 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
                   setMessages(prev => {
                     const existingIds = new Set(prev.map(msg => msg.id));
                     const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+                    
+                    // Show notifications for new messages
+                    uniqueNewMessages.forEach(message => {
+                      showMessageNotification(message, roomName);
+                    });
+                    
                     return [...prev, ...uniqueNewMessages.reverse()];
                   });
                 }
@@ -195,5 +221,6 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
     hasMore,
     loadMoreMessages,
     flatListRef,
+    roomName,
   };
 };

@@ -11,6 +11,7 @@ import {
 import auth from '@react-native-firebase/auth';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { validateRoomId } from '../utils/security';
+import { useActiveRoom } from '../contexts/activeRoomContext';
 
 // Import new hooks and components
 import { 
@@ -26,6 +27,7 @@ import { MessageList, MessageInput } from '../components/chat';
 
 const ChatScreen = ({ route }: any) => {
   const { roomId, roomName } = route.params; // Get roomId and roomName from navigation parameters
+  const { setActiveRoomId } = useActiveRoom();
   
   // Security: Validate roomId
   if (!validateRoomId(roomId)) {
@@ -37,6 +39,16 @@ const ChatScreen = ({ route }: any) => {
     );
   }
 
+  // Register this room as active when component mounts
+  useEffect(() => {
+    setActiveRoomId(roomId);
+    
+    // Cleanup: Clear active room when component unmounts
+    return () => {
+      setActiveRoomId(null);
+    };
+  }, [roomId, setActiveRoomId]);
+
   // Use custom hooks for better SoC
   const { 
     messages, 
@@ -44,7 +56,8 @@ const ChatScreen = ({ route }: any) => {
     loadingMore, 
     hasMore, 
     loadMoreMessages, 
-    flatListRef 
+    flatListRef,
+    roomName: fetchedRoomName
   } = useMessages(roomId);
   
   const { 
@@ -56,7 +69,7 @@ const ChatScreen = ({ route }: any) => {
   } = useMessageSending(roomId);
   
   const { handleTyping } = useTypingIndicator(roomId);
-  useRoomPermissions(roomId, roomName); // This hook handles header setup internally
+  useRoomPermissions(roomId, fetchedRoomName || roomName); // Use fetched room name or fallback
   const { pickAndSendPhoto } = usePhotoPicker();
   
   // Security hook
