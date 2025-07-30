@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Platform, SafeAreaView } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
@@ -14,6 +14,7 @@ import CreateChat from './app/screens/createchat';
 import ChatScreen from './app/screens/chatscreen';
 import SplashScreen from 'react-native-splash-screen';
 import { StatusBar } from 'react-native';
+import NavigationSecurity from './app/utils/navigationSecurity';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -26,7 +27,14 @@ GoogleSignin.configure({
 const App = () => {
     const [initializing, setInitializing] = useState(true);
     const [user, setUser] = useState(null);
+    const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
+    // Set navigation reference for security middleware
+    useEffect(() => {
+        if (navigationRef.current) {
+            NavigationSecurity.setNavigationRef(navigationRef.current);
+        }
+    }, []);
   
     // Handle user state changes
     function onAuthStateChanged(user: any) {
@@ -55,7 +63,10 @@ const App = () => {
             {/* Set the status bar color */}
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-                <NavigationContainer>
+                <NavigationContainer 
+                    ref={navigationRef}
+                    onStateChange={NavigationSecurity.onNavigationStateChange}
+                >
                     <Stack.Navigator
                         screenOptions={{
                             headerStyle: { backgroundColor: '#FFFFFF' }, // White header background

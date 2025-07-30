@@ -11,12 +11,25 @@ import {
   Platform,
   Image,
   Alert,
+  AppState,
 } from 'react-native';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { useHeaderHeight } from '@react-navigation/elements';
 import storage from '@react-native-firebase/storage';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { 
+  validateMessage, 
+  sanitizeInput, 
+  validateRoomId, 
+  messageRateLimit, 
+  getCurrentUser, 
+  canUserAccessRoom, 
+  validateImageFile, 
+  validateFileSize, 
+  handleSecureError, 
+  logSecurityEvent 
+} from '../utils/security';
 
 
 interface Message {
@@ -32,6 +45,17 @@ interface Message {
 
 const ChatScreen = ({ route }: any) => {
   const { roomId } = route.params; // Get roomId from navigation parameters
+  
+  // Security: Validate roomId
+  if (!validateRoomId(roomId)) {
+    Alert.alert('Error', 'Invalid room ID');
+    return (
+      <View style={styles.center}>
+        <Text>Invalid room</Text>
+      </View>
+    );
+  }
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -47,25 +71,65 @@ const ChatScreen = ({ route }: any) => {
   // Ref for the FlatList
   const flatListRef = useRef<FlatList>(null);
 
-  const pickAndSendPhoto = () => {
-  launchImageLibrary(
-    {
-      mediaType: 'photo',
-      quality: 0.7,
-    },
-    response => {
-      if (response.didCancel) return;
-      if (response.errorCode) {
-        Alert.alert('Error', 'Could not pick image.');
+  // Security: Clear sensitive data when app goes to background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'background') {
+        // Clear messages from memory for security
+        setMessages([]);
+        setNewMessage('');
+      }
+    });
+    
+    return () => subscription?.remove();
+  }, []);
+
+  const pickAndSendPhoto = async () => {
+    try {
+      const user = getCurrentUser();
+      
+      // Check rate limit
+      if (!messageRateLimit.canSendMessage(user.uid)) {
+        Alert.alert('Rate Limit', 'Please wait before sending another message.');
         return;
       }
-      const uri = response.assets && response.assets[0]?.uri;
-      if (uri) {
-        handleSendPhoto(uri);
-      }
+
+      launchImageLibrary(
+        {
+          mediaType: 'photo',
+          quality: 0.7,
+        },
+        async response => {
+          if (response.didCancel) return;
+          if (response.errorCode) {
+            handleSecureError(response.errorCode, 'Could not pick image.');
+            return;
+          }
+          
+          const uri = response.assets && response.assets[0]?.uri;
+          if (!uri) return;
+
+          // Validate image file
+          const isValidImage = await validateImageFile(uri);
+          const isValidSize = await validateFileSize(uri, 5); // 5MB limit
+
+          if (!isValidImage) {
+            Alert.alert('Invalid File', 'Please select a valid image (max 1024x1024px).');
+            return;
+          }
+
+          if (!isValidSize) {
+            Alert.alert('File Too Large', 'Please select an image smaller than 5MB.');
+            return;
+          }
+
+          handleSendPhoto(uri);
+        }
+      );
+    } catch (error) {
+      handleSecureError(error, 'Could not access photo library.');
     }
-  );
-};
+  };
 
   // --- Effect Hook for Fetching Messages ---
   useEffect(() => {
@@ -80,6 +144,19 @@ const ChatScreen = ({ route }: any) => {
 
     const setupMessagesListener = async () => {
       try {
+        // Security: Check if user has access to this room
+        const user = getCurrentUser();
+        const hasAccess = await canUserAccessRoom(roomId, user.uid);
+        
+        if (!hasAccess) {
+          Alert.alert('Access Denied', 'You do not have permission to view this chat.');
+          setLoading(false);
+          return;
+        }
+
+        // Log security event
+        await logSecurityEvent('chat_room_accessed', { roomId });
+
         // Initial fetch of last 50 messages
         const initialSnapshot = await firestore()
           .collection('chatRooms')
@@ -136,6 +213,7 @@ const ChatScreen = ({ route }: any) => {
               },
               error => {
                 console.error(`Error listening for new messages: `, error);
+                handleSecureError(error, 'Error loading new messages.');
               }
             );
         }
@@ -144,7 +222,7 @@ const ChatScreen = ({ route }: any) => {
         if ((error as any).code === 'permission-denied') {
           Alert.alert("Permission Error", "You don't have permission to view these messages.");
         } else {
-          Alert.alert("Error", "Could not load messages.");
+          handleSecureError(error, "Could not load messages.");
         }
         setLoading(false);
       }
@@ -168,7 +246,9 @@ const ChatScreen = ({ route }: any) => {
 
   // --- Handle Typing ---
   const handleTyping = (text: string) => {
-    setNewMessage(text);
+    // Security: Sanitize and validate input
+    const sanitizedText = sanitizeInput(text);
+    setNewMessage(sanitizedText);
 
     if (!isTyping.current) {
       isTyping.current = true;
@@ -176,7 +256,10 @@ const ChatScreen = ({ route }: any) => {
       firestore()
         .collection('chatRooms')
         .doc(roomId)
-        .update({ [`typing.${currentUser?.uid}`]: true });
+        .update({ [`typing.${currentUser?.uid}`]: true })
+        .catch(error => {
+          console.error('Error updating typing status:', error);
+        });
     }
 
     if (isTypingTimeout.current) {
@@ -189,31 +272,55 @@ const ChatScreen = ({ route }: any) => {
       firestore()
         .collection('chatRooms')
         .doc(roomId)
-        .update({ [`typing.${currentUser?.uid}`]: false });
+        .update({ [`typing.${currentUser?.uid}`]: false })
+        .catch(error => {
+          console.error('Error updating typing status:', error);
+        });
     }, 2000); // Reset typing state after 2 seconds of inactivity
   };
 
   // --- Callback Hook for Sending Messages ---
   const handleSendMessage = useCallback(async () => {
-    if (!newMessage.trim() || !currentUser || isSending || !roomId) return;
-
-    setIsSending(true);
-    const messageText = newMessage;
-    setNewMessage('');
-
-    const senderName = currentUser.displayName || 'Unknown User';
-    const senderAvatarUrl = currentUser.photoURL || null;
-
-    const messageTimestamp = firestore.FieldValue.serverTimestamp();
-    const messageData = {
-      text: messageText,
-      createdAt: messageTimestamp,
-      userId: currentUser.uid,
-      senderName: senderName,
-      senderAvatarUrl: senderAvatarUrl,
-    };
-
     try {
+      const user = getCurrentUser();
+      
+      // Security: Validate message
+      if (!validateMessage(newMessage)) {
+        Alert.alert('Invalid Message', 'Message must be between 1 and 1000 characters.');
+        return;
+      }
+
+      // Security: Check rate limit
+      if (!messageRateLimit.canSendMessage(user.uid)) {
+        Alert.alert('Rate Limit', 'Please wait before sending another message.');
+        return;
+      }
+
+      // Security: Check room access
+      const hasAccess = await canUserAccessRoom(roomId, user.uid);
+      if (!hasAccess) {
+        Alert.alert('Access Denied', 'You do not have permission to send messages here.');
+        return;
+      }
+
+      if (isSending) return;
+
+      setIsSending(true);
+      const messageText = sanitizeInput(newMessage);
+      setNewMessage('');
+
+      const senderName = user.displayName || 'Unknown User';
+      const senderAvatarUrl = user.photoURL || null;
+
+      const messageTimestamp = firestore.FieldValue.serverTimestamp();
+      const messageData = {
+        text: messageText,
+        createdAt: messageTimestamp,
+        userId: user.uid,
+        senderName: senderName,
+        senderAvatarUrl: senderAvatarUrl,
+      };
+
       const roomRef = firestore().collection('chatRooms').doc(roomId);
       const messagesRef = roomRef.collection('messages');
 
@@ -226,39 +333,59 @@ const ChatScreen = ({ route }: any) => {
       });
 
       await batch.commit();
+      
+      // Log security event
+      await logSecurityEvent('message_sent', { roomId, messageLength: messageText.length });
+      
     } catch (error) {
       console.error(`Error sending message to room ${roomId}: `, error);
-      setNewMessage(messageText);
+      setNewMessage(newMessage); // Restore message on error
+      
       if ((error as { code?: string }).code === 'permission-denied') {
         Alert.alert("Permission Error", "You don't have permission to send messages here.");
       } else {
-        Alert.alert("Error", "Could not send message.");
+        handleSecureError(error, "Could not send message.");
       }
     } finally {
       setIsSending(false);
     }
-  }, [newMessage, currentUser, roomId, isSending]);
+  }, [newMessage, roomId, isSending]);
 
  const handleSendPhoto = useCallback(
   async (uri: string) => {
-    if (!currentUser || isSending || !roomId) return;
-
-    setIsSending(true);
-
     try {
-      const fileName = `${currentUser.uid}_${Date.now()}`;
+      const user = getCurrentUser();
+      
+      // Security: Check rate limit
+      if (!messageRateLimit.canSendMessage(user.uid)) {
+        Alert.alert('Rate Limit', 'Please wait before sending another message.');
+        return;
+      }
+
+      // Security: Check room access
+      const hasAccess = await canUserAccessRoom(roomId, user.uid);
+      if (!hasAccess) {
+        Alert.alert('Access Denied', 'You do not have permission to send photos here.');
+        return;
+      }
+
+      if (isSending) return;
+
+      setIsSending(true);
+
+      const fileName = `${user.uid}_${Date.now()}`;
       const ref = storage().ref(`chatRooms/${roomId}/${fileName}`);
       await ref.putFile(uri);
       const downloadURL = await ref.getDownloadURL();
 
-      const senderName = currentUser.displayName || 'Unknown User';
-      const senderAvatarUrl = currentUser.photoURL || null;
+      const senderName = user.displayName || 'Unknown User';
+      const senderAvatarUrl = user.photoURL || null;
       const messageTimestamp = firestore.FieldValue.serverTimestamp();
 
       const messageData = {
         photoURL: downloadURL,
         createdAt: messageTimestamp,
-        userId: currentUser.uid,
+        userId: user.uid,
         senderName: senderName,
         senderAvatarUrl: senderAvatarUrl,
       };
@@ -274,14 +401,17 @@ const ChatScreen = ({ route }: any) => {
       });
 
       await batch.commit();
+      
+      // Log security event
+      await logSecurityEvent('photo_sent', { roomId });
+      
     } catch (error) {
-      Alert.alert('Error', 'Failed to send photo.');
-      console.error(error);
+      handleSecureError(error, 'Failed to send photo.');
     } finally {
       setIsSending(false);
     }
   },
-  [currentUser, roomId, isSending]
+  [roomId, isSending]
 );
 
   // --- Load More Messages Function ---

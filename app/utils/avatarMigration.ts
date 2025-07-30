@@ -13,7 +13,7 @@ export const updateUserAvatarInMessages = async (newAvatarURL: string) => {
     // Get all chat rooms
     const chatRoomsSnapshot = await firestore().collection('chatRooms').get();
     
-    const batch = firestore().batch();
+    let batch = firestore().batch();
     let batchCount = 0;
     
     for (const roomDoc of chatRoomsSnapshot.docs) {
@@ -27,7 +27,7 @@ export const updateUserAvatarInMessages = async (newAvatarURL: string) => {
         .where('userId', '==', currentUser.uid)
         .get();
       
-      messagesSnapshot.forEach(messageDoc => {
+      for (const messageDoc of messagesSnapshot.docs) {
         batch.update(messageDoc.ref, {
           senderAvatarUrl: newAvatarURL
         });
@@ -36,10 +36,11 @@ export const updateUserAvatarInMessages = async (newAvatarURL: string) => {
         // Firestore batch limit is 500, so commit and start a new batch if needed
         if (batchCount >= 400) {
           // Leave some buffer before the 500 limit
-          batch.commit();
+          await batch.commit();
+          batch = firestore().batch(); // Create new batch
           batchCount = 0;
         }
-      });
+      }
     }
     
     // Commit any remaining updates
