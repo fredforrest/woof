@@ -27,11 +27,11 @@ class ErrorBoundary extends Component<Props, State> {
     console.error('Error caught by boundary:', error);
     console.error('Error info:', errorInfo);
     
-    // Log security event
+    // Log security event with safe data
     logSecurityEvent('app_error_boundary', {
-      errorMessage: error.message,
-      errorStack: error.stack?.substring(0, 500), // Limit stack trace length
-      componentStack: errorInfo.componentStack?.substring(0, 500)
+      errorMessage: error.message || 'Unknown error',
+      errorStack: error.stack?.substring(0, 500) || 'No stack trace',
+      componentStack: errorInfo.componentStack?.substring(0, 500) || 'No component stack'
     }).catch(logError => {
       console.error('Failed to log error event:', logError);
     });

@@ -12,6 +12,7 @@ import ProfileSettings from './app/screens/profilesettings';
 import { RootStackParamList } from './app/components/navigation/types';
 import CreateChat from './app/screens/createchat';
 import ChatScreen from './app/screens/chatscreen';
+import PendingRequestsScreen from './app/screens/pendingrequests';
 import SplashScreen from 'react-native-splash-screen';
 import { StatusBar } from 'react-native';
 import NavigationSecurity from './app/utils/navigationSecurity';
@@ -100,6 +101,11 @@ const App = () => {
                                     name="Create Room"
                                     component={CreateChat}
                                     options={{ headerShown: true }}
+                                />
+                                <Stack.Screen
+                                    name="PendingRequests"
+                                    component={PendingRequestsScreen}
+                                    options={{ headerShown: false }}
                                 />
                                 <Stack.Screen
                                     name="ChatScreen"

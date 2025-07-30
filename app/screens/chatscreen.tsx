@@ -246,9 +246,8 @@ const ChatScreen = ({ route }: any) => {
 
   // --- Handle Typing ---
   const handleTyping = (text: string) => {
-    // Security: Sanitize and validate input
-    const sanitizedText = sanitizeInput(text);
-    setNewMessage(sanitizedText);
+    // Set message without sanitizing on every keystroke
+    setNewMessage(text);
 
     if (!isTyping.current) {
       isTyping.current = true;
@@ -306,7 +305,14 @@ const ChatScreen = ({ route }: any) => {
       if (isSending) return;
 
       setIsSending(true);
-      const messageText = sanitizeInput(newMessage);
+      const messageText = sanitizeInput(newMessage).trim();
+      
+      // Don't send empty messages
+      if (!messageText) {
+        setIsSending(false);
+        return;
+      }
+      
       setNewMessage('');
 
       const senderName = user.displayName || 'Unknown User';
