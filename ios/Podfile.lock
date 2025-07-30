@@ -3001,6 +3001,8 @@ PODS:
     - React-perflogger (= 0.78.1)
     - React-utils (= 0.78.1)
   - RecaptchaInterop (101.0.0)
+  - RNCPushNotificationIOS (1.11.0):
+    - React-Core
   - RNFBApp (22.2.0):
     - Firebase/CoreOnly (= 11.12.0)
     - React-Core
@@ -3042,6 +3044,27 @@ PODS:
     - DoubleConversion
     - glog
     - GoogleSignIn (~> 7.1)
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNPermissions (5.4.2):
+    - DoubleConversion
+    - glog
     - hermes-engine
     - RCT-Folly (= 2024.11.18.00)
     - RCTRequired
@@ -3179,12 +3202,14 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -3353,6 +3378,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNCPushNotificationIOS:
+    :path: "../node_modules/@react-native-community/push-notification-ios"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBAuth:
@@ -3365,6 +3392,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   Yoga:
@@ -3462,12 +3491,14 @@ SPEC CHECKSUMS:
   ReactCodegen: 5e0e4a579d3492d4cb81ed7caadbaae66a619b7e
   ReactCommon: 00e8f55183ce1358c920a954cd588831ccf0c397
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  RNCPushNotificationIOS: 6c4ca3388c7434e4a662b92e4dfeeee858e6f440
   RNFBApp: 6e738f1d86520e65e7dc4d5a6e7422ff0c908e6a
   RNFBAuth: 5098e2f5e1341d9c06994ceeb216093edb67c749
   RNFBFirestore: ca9fa0d32f56cdaceff22b0addcb77448d1c565c
   RNFBStorage: 65958ae20aa398d35c246cd2d12b985937d12219
   RNGestureHandler: 64139a6aa433bba9bf4c6d5fe5c3a27d9ec33b8d
   RNGoogleSignin: 1a215139c537bb0430abdb9ff9a8e437578e515d
+  RNPermissions: 34a056b3e81da28fafb55fb8f895acf4ac9504a1
   RNScreens: 04304337930029a5d0db297b22eb0f07adc31a2c
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 464c847c822847c88560af530ca15273b8e45261

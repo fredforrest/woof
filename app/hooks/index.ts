@@ -5,6 +5,7 @@ export { useTypingIndicator } from './useTypingIndicator';
 export { useRoomPermissions } from './useRoomPermissions';
 export { usePhotoPicker } from './usePhotoPicker';
 export { useSecurity } from './useSecurity';
+export { useNotifications } from './useNotifications';
 
 // Types
 export type { Message } from './useMessages';

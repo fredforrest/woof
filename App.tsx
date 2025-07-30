@@ -17,6 +17,9 @@ import PendingRequestsScreen from './app/screens/pendingrequests';
 import SplashScreen from 'react-native-splash-screen';
 import { StatusBar } from 'react-native';
 import NavigationSecurity from './app/utils/navigationSecurity';
+import { notificationManager } from './app/utils/notificationManager';
+import { notificationNavigationHandler } from './app/utils/notificationNavigationHandler';
+import { ActiveRoomProvider } from './app/contexts/activeRoomContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -31,11 +34,26 @@ const App = () => {
     const [user, setUser] = useState(null);
     const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
-    // Set navigation reference for security middleware
+    // Set navigation reference for security middleware and notifications
     useEffect(() => {
         if (navigationRef.current) {
             NavigationSecurity.setNavigationRef(navigationRef.current);
+            notificationNavigationHandler.setNavigationRef(navigationRef.current);
         }
+    }, []);
+
+    // Initialize notifications
+    useEffect(() => {
+        const initNotifications = async () => {
+            try {
+                await notificationManager.initialize();
+                console.log('Notifications initialized in App.tsx');
+            } catch (error) {
+                console.error('Failed to initialize notifications:', error);
+            }
+        };
+
+        initNotifications();
     }, []);
   
     // Handle user state changes
@@ -66,66 +84,68 @@ const App = () => {
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-                    <NavigationContainer 
-                        ref={navigationRef}
-                        onStateChange={NavigationSecurity.onNavigationStateChange}
-                    >
-                    <Stack.Navigator
-                        screenOptions={{
-                            headerStyle: { backgroundColor: '#FFFFFF' }, // White header background
-                            headerTintColor: '#000000', // Black text for header
-                            headerBackVisible: true,
-                        }}
-                    >
-                        {user ? (
-                            <>
+                    <ActiveRoomProvider>
+                        <NavigationContainer 
+                            ref={navigationRef}
+                            onStateChange={NavigationSecurity.onNavigationStateChange}
+                        >
+                        <Stack.Navigator
+                            screenOptions={{
+                                headerStyle: { backgroundColor: '#FFFFFF' }, // White header background
+                                headerTintColor: '#000000', // Black text for header
+                                headerBackVisible: true,
+                            }}
+                        >
+                            {user ? (
+                                <>
+                                    <Stack.Screen
+                                        name="Home"
+                                        component={HomeScreen}
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name="ChatRooms"
+                                        component={ChatRooms}
+                                        options={{ headerShown: true, title: "Chat Rooms" }}
+                                    />
+                                    <Stack.Screen
+                                        name="Profile"
+                                        component={Profile}
+                                        options={{ headerShown: true }}
+                                    />
+                                    <Stack.Screen
+                                        name="Profile Settings"
+                                        component={ProfileSettings}
+                                        options={{ headerShown: true }}
+                                    />
+                                    <Stack.Screen
+                                        name="Create Room"
+                                        component={CreateChat}
+                                        options={{ headerShown: true }}
+                                    />
+                                    <Stack.Screen
+                                        name="PendingRequests"
+                                        component={PendingRequestsScreen}
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name="ChatScreen"
+                                        component={ChatScreen}
+                                        options={{ headerShown: true, title: "Chat" }}
+                                        
+                                    />
+                                </>
+                            ) : (
                                 <Stack.Screen
-                                    name="Home"
-                                    component={HomeScreen}
+                                    name="LoginMenu"
+                                    component={LoginMenu}
                                     options={{ headerShown: false }}
                                 />
-                                <Stack.Screen
-                                    name="ChatRooms"
-                                    component={ChatRooms}
-                                    options={{ headerShown: true, title: "Chat Rooms" }}
-                                />
-                                <Stack.Screen
-                                    name="Profile"
-                                    component={Profile}
-                                    options={{ headerShown: true }}
-                                />
-                                <Stack.Screen
-                                    name="Profile Settings"
-                                    component={ProfileSettings}
-                                    options={{ headerShown: true }}
-                                />
-                                <Stack.Screen
-                                    name="Create Room"
-                                    component={CreateChat}
-                                    options={{ headerShown: true }}
-                                />
-                                <Stack.Screen
-                                    name="PendingRequests"
-                                    component={PendingRequestsScreen}
-                                    options={{ headerShown: false }}
-                                />
-                                <Stack.Screen
-                                    name="ChatScreen"
-                                    component={ChatScreen}
-                                    options={{ headerShown: true, title: "Chat" }}
-                                    
-                                />
-                            </>
-                        ) : (
-                            <Stack.Screen
-                                name="LoginMenu"
-                                component={LoginMenu}
-                                options={{ headerShown: false }}
-                            />
-                        )}
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </SafeAreaView>
+                            )}
+                        </Stack.Navigator>
+                    </NavigationContainer>
+                    </ActiveRoomProvider>
+                </SafeAreaView>
             </GestureHandlerRootView>
         </>
     );
