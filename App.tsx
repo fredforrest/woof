@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import LoginMenu from './app/screens/loginmenu';
 import HomeScreen from './app/screens/homescreen';
 import ChatRooms from './app/screens/chatrooms';
@@ -14,6 +15,7 @@ import { RootStackParamList } from './app/components/navigation/types';
 import CreateChat from './app/screens/createchat';
 import ChatScreen from './app/screens/chatscreen';
 import PendingRequestsScreen from './app/screens/pendingrequests';
+import FriendsScreen from './app/screens/friends';
 import SplashScreen from 'react-native-splash-screen';
 import { StatusBar } from 'react-native';
 import NavigationSecurity from './app/utils/navigationSecurity';
@@ -31,7 +33,7 @@ GoogleSignin.configure({
 
 const App = () => {
     const [initializing, setInitializing] = useState(true);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<any>(null);
     const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
     // Set navigation reference for security middleware and notifications
@@ -61,6 +63,35 @@ const App = () => {
         setUser(user);
         if (initializing) setInitializing(false);
     }
+
+    // Keep user's online status updated while app is active
+    useEffect(() => {
+        if (!user) return;
+
+        const updateOnlineStatus = async () => {
+            try {
+                await firestore()
+                    .collection('users')
+                    .doc(user.uid)
+                    .update({
+                        isOnline: true,
+                        lastSeen: firestore.FieldValue.serverTimestamp()
+                    });
+            } catch (error) {
+                console.error('Error updating online status:', error);
+            }
+        };
+
+        // Update immediately when user logs in
+        updateOnlineStatus();
+
+        // Update every 2 minutes while app is active
+        const onlineInterval = setInterval(updateOnlineStatus, 2 * 60 * 1000);
+
+        return () => {
+            clearInterval(onlineInterval);
+        };
+    }, [user]);
 
     // Subscribe to authentication state changes
     useEffect(() => {
@@ -117,6 +148,11 @@ const App = () => {
                                         name="Profile Settings"
                                         component={ProfileSettings}
                                         options={{ headerShown: true }}
+                                    />
+                                    <Stack.Screen
+                                        name="Friends"
+                                        component={FriendsScreen}
+                                        options={{ headerShown: false }}
                                     />
                                     <Stack.Screen
                                         name="Create Room"

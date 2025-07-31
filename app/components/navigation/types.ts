@@ -19,6 +19,7 @@ export type RootStackParamList = {
     'Profile Settings': undefined;
     'Create Room': undefined;
     PendingRequests: undefined;
+    Friends: undefined;
     ChatScreen: { roomId: string; 
       roomName: string;
 }; // Example of a screen that expects parameters

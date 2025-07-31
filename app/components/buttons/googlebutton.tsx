@@ -1,5 +1,6 @@
 import React from 'react';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Text, StyleSheet, TouchableOpacity, Alert, Image, View} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -25,7 +26,35 @@ export default function GoogleSignIn() {
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
       // Sign-in the user with the credential
-      await auth().signInWithCredential(googleCredential);
+      const userCredential = await auth().signInWithCredential(googleCredential);
+      const user = userCredential.user;
+
+      // Create or update user document in Firestore
+      if (user) {
+        const userDoc = await firestore().collection('users').doc(user.uid).get();
+        
+        if (!userDoc.exists) {
+          // Create new user document
+          await firestore().collection('users').doc(user.uid).set({
+            userName: user.displayName || 'User',
+            displayName: user.displayName || 'User',
+            email: user.email || '',
+            photoURL: user.photoURL || '',
+            dogType: 'Unknown',
+            friends: [],
+            sentFriendRequests: [],
+            isOnline: true,
+            lastSeen: firestore.FieldValue.serverTimestamp(),
+            createdAt: firestore.FieldValue.serverTimestamp()
+          });
+        } else {
+          // Update existing user's online status
+          await firestore().collection('users').doc(user.uid).update({
+            isOnline: true,
+            lastSeen: firestore.FieldValue.serverTimestamp()
+          });
+        }
+      }
 
       // Navigate to the Home screen after successful sign-in
       Alert.alert('Success', 'Signed in with Google!');
