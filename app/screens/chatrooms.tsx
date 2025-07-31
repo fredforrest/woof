@@ -290,8 +290,6 @@ const ChatRooms = ({ }) => { // Pass navigation prop
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Test Button for Notifications - Remove in production */}
-      <NotificationTestButton />
       
       {/* Notification Header */}
       {pendingRequestsCount > 0 && (
