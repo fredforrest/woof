@@ -29,19 +29,11 @@ const ChatScreen = ({ route }: any) => {
   const { roomId, roomName } = route.params; // Get roomId and roomName from navigation parameters
   const { setActiveRoomId } = useActiveRoom();
   
-  // Security: Validate roomId
-  if (!validateRoomId(roomId)) {
-    Alert.alert('Error', 'Invalid room ID');
-    return (
-      <View style={styles.center}>
-        <Text>Invalid room</Text>
-      </View>
-    );
-  }
-
   // Register this room as active when component mounts
   useEffect(() => {
-    setActiveRoomId(roomId);
+    if (roomId) {
+      setActiveRoomId(roomId);
+    }
     
     // Cleanup: Clear active room when component unmounts
     return () => {
@@ -78,7 +70,17 @@ const ChatScreen = ({ route }: any) => {
     // Note: This is handled internally by the security hook
   });
 
-  const headerHeight = useHeaderHeight(); // Get header height for KAV offset
+  const headerHeight = useHeaderHeight();
+
+  // Security: Validate roomId after hooks
+  if (!validateRoomId(roomId)) {
+    Alert.alert('Error', 'Invalid room ID');
+    return (
+      <View style={styles.center}>
+        <Text>Invalid room</Text>
+      </View>
+    );
+  } // Get header height for KAV offset
 
   // Legacy pickAndSendPhoto function that uses the new hook
   const pickAndSendPhotoLegacy = async () => {

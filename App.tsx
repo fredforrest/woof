@@ -5,8 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
-import { UserService } from './app/services';
+import { UserService, NotificationService } from './app/services';
 import LoginMenu from './app/screens/LoginMenu';
 import HomeScreen from './app/screens/HomeScreen';
 import ChatRooms from './app/screens/ChatRooms';
@@ -20,8 +19,6 @@ import FriendsScreen from './app/screens/Friends';
 import SplashScreen from 'react-native-splash-screen';
 import { StatusBar } from 'react-native';
 import NavigationSecurity from './app/utils/navigationSecurity';
-import { notificationManager } from './app/utils/notificationManager';
-import { notificationNavigationHandler } from './app/utils/notificationNavigationHandler';
 import { ActiveRoomProvider } from './app/contexts/ActiveRoomContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -37,11 +34,10 @@ const App = () => {
     const [user, setUser] = useState<any>(null);
     const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
-    // Set navigation reference for security middleware and notifications
+    // Set navigation reference for security middleware
     useEffect(() => {
         if (navigationRef.current) {
             NavigationSecurity.setNavigationRef(navigationRef.current);
-            notificationNavigationHandler.setNavigationRef(navigationRef.current);
         }
     }, []);
 
@@ -49,7 +45,7 @@ const App = () => {
     useEffect(() => {
         const initNotifications = async () => {
             try {
-                await notificationManager.initialize();
+                await NotificationService.initialize();
                 console.log('Notifications initialized in App.tsx');
             } catch (error) {
                 console.error('Failed to initialize notifications:', error);
@@ -164,6 +160,7 @@ const App = () => {
                             onStateChange={NavigationSecurity.onNavigationStateChange}
                         >
                         <Stack.Navigator
+                            id={undefined}
                             screenOptions={{
                                 headerStyle: { backgroundColor: '#FFFFFF' }, // White header background
                                 headerTintColor: '#000000', // Black text for header
