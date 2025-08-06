@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import { UserService } from '../../services';
 
 interface User {
   id: string;
@@ -31,43 +32,14 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
   const [sendingRequest, setSendingRequest] = useState<string | null>(null);
   const currentUser = auth().currentUser;
 
-  const debugListAllUsers = async () => {
-    try {
-      const usersRef = firestore().collection('users');
-      const allUsers = await usersRef.limit(20).get();
-      
-      console.log('=== DEBUG: All users in database ===');
-      console.log('Total users:', allUsers.docs.length);
-      
-      allUsers.docs.forEach((doc, index) => {
-        const data = doc.data();
-        console.log('User ' + (index + 1) + ':', {
-          id: doc.id,
-          userName: data.userName,
-          displayName: data.displayName,
-          email: data.email,
-          dogType: data.dogType
-        });
-      });
-      
-      Alert.alert('Debug', 'Found ' + allUsers.docs.length + ' users total. Check console for details.');
-    } catch (error) {
-      console.error('Error debugging users:', error);
-      Alert.alert('Error', 'Failed to debug users.');
-    }
-  };
+  const searchUsers = async (searchQuery: string): Promise<User[]> => {
+    if (searchQuery.trim() === '') return [];
+    
+    const currentUserId = auth().currentUser?.uid;
+    if (!currentUserId) return [];
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim() || !currentUser) return;
-    
-    setSearching(true);
-    setSearchResults([]);
-    
     try {
       const usersRef = firestore().collection('users');
-      
-      console.log('Searching for:', searchQuery);
-      console.log('Search query lowercase:', searchQuery.toLowerCase());
       
       // Try multiple search strategies
       const searchStrategies = await Promise.all([
@@ -95,15 +67,12 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
       const users: User[] = [];
       const seenUserIds = new Set<string>();
       
-      console.log('Firestore search results:', searchStrategies.map(q => q.docs.length));
-      
       // Combine results from Firestore queries
       searchStrategies.forEach((querySnapshot, index) => {
-        console.log('Firestore Query ' + (index + 1) + ' found ' + querySnapshot.docs.length + ' users');
         querySnapshot.forEach(doc => {
           const userData = doc.data();
           // Don't include current user in results and avoid duplicates
-          if (doc.id !== currentUser.uid && !seenUserIds.has(doc.id)) {
+          if (doc.id !== currentUserId && !seenUserIds.has(doc.id)) {
             seenUserIds.add(doc.id);
             users.push({
               id: doc.id,
@@ -111,14 +80,12 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
               email: userData.email || '',
               dogType: userData.dogType || 'Unknown'
             });
-            console.log('Added from Firestore query:', userData);
           }
         });
       });
 
       // If Firestore queries didn't find much, do manual search (case insensitive)
       if (users.length === 0) {
-        console.log('=== Doing manual case-insensitive search ===');
         const allUsersSnapshot = await usersRef.limit(20).get();
         
         allUsersSnapshot.docs.forEach(doc => {
@@ -129,7 +96,7 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
           
           // Check if search query matches any field (case insensitive)
           if (
-            doc.id !== currentUser.uid &&
+            doc.id !== currentUserId &&
             !seenUserIds.has(doc.id) &&
             (
               userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -144,23 +111,33 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
               email: userData.email || '',
               dogType: userData.dogType || 'Unknown'
             });
-            console.log('Added from manual search:', userData);
           }
         });
       }
 
-      console.log('Final users found:', users);
-      setSearchResults(users);
+      return users;
       
-      if (users.length === 0) {
-        Alert.alert('No Results', 'No users found matching "' + searchQuery + '". The user might not have set up their profile yet.');
-      }
     } catch (error) {
       console.error('Error searching for users:', error);
       Alert.alert('Error', 'Failed to search for users. Please try again.');
-    } finally {
-      setSearching(false);
+      return [];
     }
+  };
+
+  const handleSearch = async () => {
+    if (searchQuery.trim() === '') {
+      Alert.alert('Info', 'Please enter a search term.');
+      return;
+    }
+    
+    setSearching(true);
+    const users = await searchUsers(searchQuery);
+    setSearchResults(users);
+    
+    if (users.length === 0) {
+      Alert.alert('No Results', 'No users found matching "' + searchQuery + '". The user might not have set up their profile yet.');
+    }
+    setSearching(false);
   };
 
   const handleSendFriendRequest = async (targetUser: User) => {
@@ -169,8 +146,23 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
     setSendingRequest(targetUser.id);
     
     try {
+      // Ensure current user document exists before proceeding
+      const userDocExists = await UserService.ensureUserDocumentExists(currentUser.uid);
+      if (!userDocExists) {
+        Alert.alert('Error', 'Failed to verify your user profile. Please try logging out and back in.');
+        setSendingRequest(null);
+        return;
+      }
+
       // Check if users are already friends
       const currentUserDoc = await firestore().collection('users').doc(currentUser.uid).get();
+      
+      if (!currentUserDoc.exists) {
+        Alert.alert('Error', 'Your user profile was not found. Please try logging out and back in.');
+        setSendingRequest(null);
+        return;
+      }
+      
       const currentUserData = currentUserDoc.data();
       const friends = currentUserData?.friends || [];
       const sentRequests = currentUserData?.sentFriendRequests || [];
@@ -320,14 +312,6 @@ const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) 
         </TouchableOpacity>
       </View>
 
-      {/* Debug button */}
-      <TouchableOpacity
-        style={styles.debugButton}
-        onPress={debugListAllUsers}
-      >
-        <Text style={styles.debugButtonText}>List All Users</Text>
-      </TouchableOpacity>
-
       <FlatList
         data={searchResults}
         renderItem={renderUserItem}
@@ -401,19 +385,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  debugButton: {
-    backgroundColor: '#FF9800',
-    margin: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  debugButtonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
   disabledButton: {
     opacity: 0.6,

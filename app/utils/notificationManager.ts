@@ -170,8 +170,6 @@ class NotificationManager {
     const isTestMessage = data.senderId.startsWith('test-');
     const shouldShow = isTestMessage || this.shouldShowNotification(data.roomId, data.senderId, currentUserId);
     
-    console.log('🔔 Should show notification:', shouldShow, isTestMessage ? '(test message)' : '');
-
     if (!shouldShow) {
       console.log('❌ Skipping notification - user in active room or own message');
       return;

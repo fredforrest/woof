@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { doc, updateDoc, arrayUnion } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { logSecurityEvent } from '../../utils/security';
 
@@ -62,10 +62,6 @@ const JoinRequestComponent: React.FC<JoinRequestProps> = ({
         status: 'pending'
       };
 
-      console.log('Sending join request:', newRequest); // Debug log
-      console.log('Room ID:', roomId); // Debug log
-      console.log('Current user:', currentUser.uid); // Debug log
-
       // Get the room reference and ensure it has the proper structure
       const roomRef = firestore().collection('chatRooms').doc(roomId);
       const roomSnapshot = await roomRef.get();
@@ -75,18 +71,25 @@ const JoinRequestComponent: React.FC<JoinRequestProps> = ({
       }
       
       const currentRoomData = roomSnapshot.data();
-      console.log('Current room data:', currentRoomData); // Debug log
       
       // Ensure joinRequests field exists, if not initialize it
-      if (!currentRoomData?.joinRequests) {
-        console.log('Initializing joinRequests field');
+      if (!currentRoomData?.joinRequests || currentRoomData.joinRequests.length === 0) {
+        // Initialize with empty array
         await roomRef.update({
-          joinRequests: [newRequest]
+          joinRequests: [{
+            userId: currentUser.uid,
+            requestedAt: new Date().toISOString(),
+            status: 'pending'
+          }]
         });
       } else {
-        console.log('Adding to existing joinRequests');
+        // Add to existing array
         await roomRef.update({
-          joinRequests: firestore.FieldValue.arrayUnion(newRequest)
+          joinRequests: arrayUnion({
+            userId: currentUser.uid,
+            requestedAt: new Date().toISOString(),
+            status: 'pending'
+          })
         });
       }
 
@@ -98,7 +101,8 @@ const JoinRequestComponent: React.FC<JoinRequestProps> = ({
         userId: currentUser.uid
       });
       */
-      console.log('Join request sent successfully'); // Debug log
+            
+      Alert.alert('Success', 'Join request sent successfully!');
 
       Alert.alert('Request Sent!', 'Your join request has been sent to the room owner. You\'ll be notified when they respond.');
       onRequestSent();

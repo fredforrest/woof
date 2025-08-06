@@ -24,4 +24,14 @@ export class BaseService {
         throw new Error(`Operation failed: ${error.message}`);
     }
   }
+
+  // Log errors without throwing (for non-critical operations)
+  protected static logFirebaseError(error: any, context: string): void {
+    console.error(`${context}:`, error.code || 'unknown-error', error.message);
+    
+    // Log specific error details for debugging
+    if (error.code) {
+      console.error(`Firebase Error Code: ${error.code}`);
+    }
+  }
 }

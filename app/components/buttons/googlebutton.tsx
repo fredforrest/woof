@@ -29,21 +29,29 @@ export default function GoogleSignIn() {
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      console.log('Firebase authentication successful');
+      console.log('✅ Firebase authentication successful');
 
       // Create or update user document using service layer
       if (user) {
-        console.log('Creating/updating user document...');
+        console.log('🔄 Creating/updating user document...');
         
-        await UserService.createOrUpdateUser(user.uid, {
-          userName: user.displayName || 'User',
-          displayName: user.displayName || 'User',
-          email: user.email || '',
-          photoURL: user.photoURL || '',
-          dogType: 'Unknown'
-        });
-        
-        console.log('User document updated successfully');
+        try {
+          // Small delay to ensure auth state is fully established
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          await UserService.createOrUpdateUser(user.uid, {
+            userName: user.displayName || 'User',
+            displayName: user.displayName || 'User',
+            email: user.email || '',
+            photoURL: user.photoURL || '',
+            dogType: 'Unknown'
+          });
+          
+          console.log('✅ User document updated successfully');
+        } catch (userUpdateError) {
+          console.error('⚠️ User document update failed, but login successful:', userUpdateError);
+          // Don't fail the entire login process if user document creation fails
+        }
       }
 
       // Don't navigate manually - let App.tsx handle navigation based on auth state

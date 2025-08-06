@@ -3062,6 +3062,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNNotifee (9.1.8):
+    - React-Core
+    - RNNotifee/NotifeeCore (= 9.1.8)
+  - RNNotifee/NotifeeCore (9.1.8):
+    - React-Core
   - RNPermissions (5.4.2):
     - DoubleConversion
     - glog
@@ -3209,6 +3214,7 @@ DEPENDENCIES:
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
+  - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -3392,6 +3398,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
+  RNNotifee:
+    :path: "../node_modules/@notifee/react-native"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNScreens:
@@ -3498,6 +3506,7 @@ SPEC CHECKSUMS:
   RNFBStorage: 65958ae20aa398d35c246cd2d12b985937d12219
   RNGestureHandler: 64139a6aa433bba9bf4c6d5fe5c3a27d9ec33b8d
   RNGoogleSignin: 1a215139c537bb0430abdb9ff9a8e437578e515d
+  RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
   RNPermissions: 34a056b3e81da28fafb55fb8f895acf4ac9504a1
   RNScreens: 04304337930029a5d0db297b22eb0f07adc31a2c
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748

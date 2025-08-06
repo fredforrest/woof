@@ -106,7 +106,6 @@ const ProfileSettings = () => {
       });
   
       if (result.didCancel) {
-        console.log('User cancelled image picker');
         return;
       }
   

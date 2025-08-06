@@ -48,12 +48,7 @@ const JoinRoomComponent: React.FC<JoinRoomProps> = ({
       }
 
       // Add user to participants array
-      console.log('Attempting to join room:', roomId); // Debug log
-      console.log('Current user:', currentUser.uid); // Debug log
-      console.log('Room data:', roomData); // Debug log
-      
       await addUserToRoomParticipants(roomId, currentUser.uid);
-      console.log('Successfully added user to participants'); // Debug log
 
       // Log security event - temporarily disabled for debugging
       /*
