@@ -36,7 +36,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
           }
           style={styles.avatar}
           onError={() => {
-            console.log('Avatar failed to load, using default');
+            // Avatar failed to load, using default
           }}
         />
       )}

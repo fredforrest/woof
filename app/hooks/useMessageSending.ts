@@ -60,18 +60,21 @@ export const useMessageSending = (roomId: string): UseMessageSendingReturn => {
       
       setNewMessage('');
 
-      const senderName = user.displayName || 'Unknown User';
-      const senderAvatarUrl = user.photoURL || null;
+      const senderName = user.displayName || user.email?.split('@')[0] || 'Unknown User';
+      const senderAvatarUrl = user.photoURL || undefined;
 
       // Send message using service
       await ChatService.sendMessage(roomId, {
         text: messageText,
         senderName: senderName,
-        senderAvatarUrl: senderAvatarUrl || undefined,
+        senderAvatarUrl: senderAvatarUrl,
       });
       
       // Log security event
-      await logSecurityEvent('message_sent', { roomId, messageLength: messageText.length });
+      await logSecurityEvent('message_sent', { 
+        roomId: roomId || 'unknown', 
+        messageLength: messageText?.length || 0 
+      });
       
     } catch (error) {
       console.error(`Error sending message to room ${roomId}: `, error);
@@ -114,18 +117,18 @@ export const useMessageSending = (roomId: string): UseMessageSendingReturn => {
         await ref.putFile(uri);
         const downloadURL = await ref.getDownloadURL();
 
-        const senderName = user.displayName || 'Unknown User';
-        const senderAvatarUrl = user.photoURL || null;
+        const senderName = user.displayName || user.email?.split('@')[0] || 'Unknown User';
+        const senderAvatarUrl = user.photoURL || undefined;
 
         // Send photo message using service
         await ChatService.sendMessage(roomId, {
           photoURL: downloadURL,
           senderName: senderName,
-          senderAvatarUrl: senderAvatarUrl || undefined,
+          senderAvatarUrl: senderAvatarUrl,
         });
         
         // Log security event
-        await logSecurityEvent('photo_sent', { roomId });
+        await logSecurityEvent('photo_sent', { roomId: roomId || 'unknown' });
         
       } catch (error) {
         handleSecureError(error, 'Failed to send photo.');

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Platform, SafeAreaView } from 'react-native';
+import { Platform, SafeAreaView, AppState } from 'react-native';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { UserService } from './app/services';
 import LoginMenu from './app/screens/LoginMenu';
 import HomeScreen from './app/screens/HomeScreen';
 import ChatRooms from './app/screens/ChatRooms';
@@ -70,13 +71,19 @@ const App = () => {
 
         const updateOnlineStatus = async () => {
             try {
-                await firestore()
-                    .collection('users')
-                    .doc(user.uid)
-                    .update({
-                        isOnline: true,
-                        lastSeen: firestore.FieldValue.serverTimestamp()
+                // Ensure user document exists before updating online status
+                const userExists = await UserService.ensureUserDocumentExists(user.uid);
+                if (userExists) {
+                    // Use UserService to ensure user document exists before updating
+                    await UserService.createOrUpdateUser(user.uid, {
+                        displayName: user.displayName || 'User',
+                        email: user.email || '',
+                        photoURL: user.photoURL || '',
+                        isOnline: true
                     });
+                } else {
+                    console.error('Failed to ensure user document exists');
+                }
             } catch (error) {
                 console.error('Error updating online status:', error);
             }
@@ -90,6 +97,42 @@ const App = () => {
 
         return () => {
             clearInterval(onlineInterval);
+        };
+    }, [user]);
+
+    // Handle app state changes (background/foreground)
+    useEffect(() => {
+        if (!user) return;
+
+        const handleAppStateChange = async (nextAppState: string) => {
+            if (nextAppState === 'background' || nextAppState === 'inactive') {
+                // User goes offline when app is backgrounded
+                try {
+                    await UserService.updateOnlineStatus(user.uid, false);
+                    console.log('User set to offline');
+                } catch (error) {
+                    console.error('Error setting user offline:', error);
+                }
+            } else if (nextAppState === 'active') {
+                // User comes back online when app becomes active
+                try {
+                    await UserService.createOrUpdateUser(user.uid, {
+                        displayName: user.displayName || 'User',
+                        email: user.email || '',
+                        photoURL: user.photoURL || '',
+                        isOnline: true
+                    });
+                    console.log('User set to online');
+                } catch (error) {
+                    console.error('Error setting user online:', error);
+                }
+            }
+        };
+
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            subscription.remove();
         };
     }, [user]);
 

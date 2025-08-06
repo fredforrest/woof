@@ -164,12 +164,17 @@ export class ChatService extends BaseService {
     try {
       const userId = this.getCurrentUserId();
       
+      // Filter out undefined values to prevent Firestore errors
+      const cleanMessageData = Object.fromEntries(
+        Object.entries(messageData).filter(([_, value]) => value !== undefined)
+      );
+      
       await firestore()
         .collection('chatRooms')
         .doc(roomId)
         .collection('messages')
         .add({
-          ...messageData,
+          ...cleanMessageData,
           userId,
           createdAt: firestore.FieldValue.serverTimestamp(),
         });

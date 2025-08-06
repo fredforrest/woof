@@ -22,6 +22,7 @@ const LoginMenu = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
