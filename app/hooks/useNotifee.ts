@@ -94,7 +94,7 @@ export const useNotifee = (currentRoomId?: string) => {
   };
 
   // Show a simple notification
-  const showSimpleNotification = async (title: string, body: string, data?: any) => {
+  const showNotification = async (title: string, body: string, data?: any) => {
     await NotificationService.showSimpleNotification(title, body, data);
   };
 
@@ -105,6 +105,6 @@ export const useNotifee = (currentRoomId?: string) => {
     showFriendRequestNotification,
     showRoomActivityNotification,
     cancelRoomNotifications,
-    showSimpleNotification,
+    showNotification,
   };
 };
