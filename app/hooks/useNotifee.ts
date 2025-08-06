@@ -44,13 +44,11 @@ export const useNotifee = (currentRoomId?: string) => {
   ) => {
     // Don't show notifications when app is active or if it's user's own message
     if (appState === 'active') {
-      console.log('🔇 App is active, skipping notification');
       return;
     }
 
     const currentUser = auth().currentUser;
     if (!currentUser || senderId === currentUser.uid) {
-      console.log('🔇 Skipping notification for own message');
       return;
     }
 
@@ -96,7 +94,7 @@ export const useNotifee = (currentRoomId?: string) => {
   };
 
   // Show a simple notification
-  const showSimpleNotification = async (title: string, body: string, data?: any) => {
+  const showNotification = async (title: string, body: string, data?: any) => {
     await NotificationService.showSimpleNotification(title, body, data);
   };
 
@@ -107,6 +105,6 @@ export const useNotifee = (currentRoomId?: string) => {
     showFriendRequestNotification,
     showRoomActivityNotification,
     cancelRoomNotifications,
-    showSimpleNotification,
+    showNotification,
   };
 };

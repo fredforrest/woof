@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 import { getCurrentUser, canUserAccessRoom, logSecurityEvent, handleSecureError } from '../utils/security';
-import { useNotifications } from './useNotifications';
+import { useNotifee } from './useNotifee';
 import { ChatService, Message } from '../services';
 
 interface UseMessagesReturn {
@@ -25,7 +25,7 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
   const flatListRef = useRef<any>(null);
 
   // Init notifications for this room
-  const { showMessageNotification, cancelRoomNotifications, appState } = useNotifications(roomId);
+  const { showMessageNotification, cancelRoomNotifications, appState } = useNotifee(roomId);
 
   // Load more messages function
   const loadMoreMessages = async () => {
@@ -122,7 +122,14 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
                 
                 // Show notifications for new messages
                 uniqueNewMessages.forEach(message => {
-                  showMessageNotification(message, roomName);
+                  showMessageNotification(
+                    message.senderName,
+                    message.text || 'Photo',
+                    roomName,
+                    roomId,
+                    message.userId,
+                    message.senderAvatarUrl || undefined
+                  );
                 });
                 
                 return [...prev, ...uniqueNewMessages];
@@ -152,7 +159,7 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
         messagesListener();
       }
     };
-  }, [roomId]);
+  }, [roomId, showMessageNotification, roomName]);
 
   return {
     messages,
