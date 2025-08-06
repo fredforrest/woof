@@ -7,7 +7,7 @@ import { UserService } from '../../services';
 export default function GoogleSignIn() {
   async function onGoogleButtonPress() {
     try {
-      console.log('🔄 Starting Google Sign-In process...');
+      console.log('Starting Google Sign-In process...');
       
       // Check if your device supports Google Play
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -20,7 +20,7 @@ export default function GoogleSignIn() {
         throw new Error('No ID token found');
       } 
 
-      console.log('✅ ID token received, creating Firebase credential...');
+      console.log('ID token received, creating Firebase credential...');
 
       // Create a Google credential with the token
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
@@ -29,11 +29,11 @@ export default function GoogleSignIn() {
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      console.log('✅ Firebase authentication successful');
+      console.log('Firebase authentication successful');
 
       // Create or update user document using service layer
       if (user) {
-        console.log('🔄 Creating/updating user document...');
+        console.log('Creating/updating user document...');
         
         await UserService.createOrUpdateUser(user.uid, {
           userName: user.displayName || 'User',
@@ -43,7 +43,7 @@ export default function GoogleSignIn() {
           dogType: 'Unknown'
         });
         
-        console.log('✅ User document updated successfully');
+        console.log('User document updated successfully');
       }
 
       // Don't navigate manually - let App.tsx handle navigation based on auth state
@@ -51,7 +51,7 @@ export default function GoogleSignIn() {
       Alert.alert('Success', 'Signed in with Google!');
       
     } catch (error: any) {
-      console.error('❌ Google Sign-In Error:', error);
+      console.error('Google Sign-In Error:', error);
       console.error('Error Code:', error.code);
       console.error('Error Message:', error.message);
       
