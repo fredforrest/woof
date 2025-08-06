@@ -17,7 +17,6 @@ import { useNavigation } from '@react-navigation/native';
 import JoinRoomComponent from '../components/ui/JoinRoomComponent';
 import JoinRequestComponent from '../components/ui/JoinRequestComponent';
 import JoinRequestNotifications from '../components/ui/JoinRequestNotifications';
-import NotificationTestButton from '../components/ui/NotificationTestButton';
 import { Swipeable } from 'react-native-gesture-handler';
 
 
@@ -290,8 +289,6 @@ const ChatRooms = ({ }) => { // Pass navigation prop
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Test Button for Notifications - Remove in production */}
-      <NotificationTestButton />
       
       {/* Notification Header */}
       {pendingRequestsCount > 0 && (
