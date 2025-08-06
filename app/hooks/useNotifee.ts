@@ -93,7 +93,7 @@ export const useNotifee = (currentRoomId?: string) => {
     await NotificationService.cancelRoomNotifications(roomId);
   };
 
-  // Show a simple notification
+  // Show a notification
   const showNotification = async (title: string, body: string, data?: any) => {
     await NotificationService.showSimpleNotification(title, body, data);
   };
