@@ -1,16 +1,14 @@
 import React from 'react';
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Text, StyleSheet, TouchableOpacity, Alert, Image, View} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { RootStackNavigationProp } from '../navigation/types';
+import { UserService } from '../../services';
 
 export default function GoogleSignIn() {
-  const navigation = useNavigation<RootStackNavigationProp>();
-
   async function onGoogleButtonPress() {
     try {
+      console.log('Starting Google Sign-In process...');
+      
       // Check if your device supports Google Play
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
@@ -22,6 +20,8 @@ export default function GoogleSignIn() {
         throw new Error('No ID token found');
       } 
 
+      console.log('ID token received, creating Firebase credential...');
+
       // Create a Google credential with the token
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
@@ -29,39 +29,39 @@ export default function GoogleSignIn() {
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      // Create or update user document in Firestore
+      console.log('Firebase authentication successful');
+
+      // Create or update user document using service layer
       if (user) {
-        const userDoc = await firestore().collection('users').doc(user.uid).get();
+        console.log('Creating/updating user document...');
         
-        if (!userDoc.exists) {
-          // Create new user document
-          await firestore().collection('users').doc(user.uid).set({
-            userName: user.displayName || 'User',
-            displayName: user.displayName || 'User',
-            email: user.email || '',
-            photoURL: user.photoURL || '',
-            dogType: 'Unknown',
-            friends: [],
-            sentFriendRequests: [],
-            isOnline: true,
-            lastSeen: firestore.FieldValue.serverTimestamp(),
-            createdAt: firestore.FieldValue.serverTimestamp()
-          });
-        } else {
-          // Update existing user's online status
-          await firestore().collection('users').doc(user.uid).update({
-            isOnline: true,
-            lastSeen: firestore.FieldValue.serverTimestamp()
-          });
-        }
+        await UserService.createOrUpdateUser(user.uid, {
+          userName: user.displayName || 'User',
+          displayName: user.displayName || 'User',
+          email: user.email || '',
+          photoURL: user.photoURL || '',
+          dogType: 'Unknown'
+        });
+        
+        console.log('User document updated successfully');
       }
 
-      // Navigate to the Home screen after successful sign-in
+      // Don't navigate manually - let App.tsx handle navigation based on auth state
+      console.log('🎉 Google Sign-In completed successfully!');
       Alert.alert('Success', 'Signed in with Google!');
-      navigation.navigate("Home");
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error('Google Sign-In Error:', error);
-      Alert.alert('Error', 'Failed to sign in with Google.');
+      console.error('Error Code:', error.code);
+      console.error('Error Message:', error.message);
+      
+      // Handle user cancellation gracefully
+      if (error.code === '12501') {
+        console.log('ℹ️ User cancelled Google Sign-In');
+        return; // Don't show error for cancellation
+      }
+      
+      Alert.alert('Error', 'Failed to sign in with Google. Please try again.');
     }
   }
 
