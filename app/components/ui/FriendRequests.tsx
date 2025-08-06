@@ -25,7 +25,7 @@ interface FriendRequestsProps {
   onRequestsChange?: (count: number) => void;
 }
 
-const FriendRequestsComponent: React.FC<FriendRequestsProps> = ({ onRequestsChange }) => {
+const FriendRequests: React.FC<FriendRequestsProps> = ({ onRequestsChange }) => {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -371,4 +371,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FriendRequestsComponent;
+export default FriendRequests;

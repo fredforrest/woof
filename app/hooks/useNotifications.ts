@@ -3,7 +3,7 @@ import { AppState, AppStateStatus } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { notificationManager, NotificationData } from '../utils/notificationManager';
 import { Message } from './useMessages';
-import { useActiveRoom } from '../contexts/activeRoomContext';
+import { useActiveRoom } from '../contexts/ActiveRoomContext';
 
 interface UseNotificationsReturn {
   isInitialized: boolean;

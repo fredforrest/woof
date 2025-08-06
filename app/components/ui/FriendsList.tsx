@@ -24,7 +24,7 @@ interface FriendsListProps {
   onFriendPress?: (friend: Friend) => void;
 }
 
-const FriendsListComponent: React.FC<FriendsListProps> = ({ onFriendPress }) => {
+const FriendsList: React.FC<FriendsListProps> = ({ onFriendPress }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [filteredFriends, setFilteredFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -376,4 +376,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FriendsListComponent;
+export default FriendsList;

@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import { 
   validateMessage, 
@@ -11,6 +10,7 @@ import {
   logSecurityEvent, 
   handleSecureError 
 } from '../utils/security';
+import { ChatService } from '../services';
 
 interface UseMessageSendingReturn {
   newMessage: string;
@@ -63,27 +63,12 @@ export const useMessageSending = (roomId: string): UseMessageSendingReturn => {
       const senderName = user.displayName || 'Unknown User';
       const senderAvatarUrl = user.photoURL || null;
 
-      const messageTimestamp = firestore.FieldValue.serverTimestamp();
-      const messageData = {
+      // Send message using service
+      await ChatService.sendMessage(roomId, {
         text: messageText,
-        createdAt: messageTimestamp,
-        userId: user.uid,
         senderName: senderName,
-        senderAvatarUrl: senderAvatarUrl,
-      };
-
-      const roomRef = firestore().collection('chatRooms').doc(roomId);
-      const messagesRef = roomRef.collection('messages');
-
-      const batch = firestore().batch();
-
-      batch.set(messagesRef.doc(), messageData);
-      batch.update(roomRef, {
-        lastMessageTimestamp: messageTimestamp,
-        lastMessageText: messageText,
+        senderAvatarUrl: senderAvatarUrl || undefined,
       });
-
-      await batch.commit();
       
       // Log security event
       await logSecurityEvent('message_sent', { roomId, messageLength: messageText.length });
@@ -131,27 +116,13 @@ export const useMessageSending = (roomId: string): UseMessageSendingReturn => {
 
         const senderName = user.displayName || 'Unknown User';
         const senderAvatarUrl = user.photoURL || null;
-        const messageTimestamp = firestore.FieldValue.serverTimestamp();
 
-        const messageData = {
+        // Send photo message using service
+        await ChatService.sendMessage(roomId, {
           photoURL: downloadURL,
-          createdAt: messageTimestamp,
-          userId: user.uid,
           senderName: senderName,
-          senderAvatarUrl: senderAvatarUrl,
-        };
-
-        const roomRef = firestore().collection('chatRooms').doc(roomId);
-        const messagesRef = roomRef.collection('messages');
-        const batch = firestore().batch();
-
-        batch.set(messagesRef.doc(), messageData);
-        batch.update(roomRef, {
-          lastMessageTimestamp: messageTimestamp,
-          lastMessageText: '[Photo]',
+          senderAvatarUrl: senderAvatarUrl || undefined,
         });
-
-        await batch.commit();
         
         // Log security event
         await logSecurityEvent('photo_sent', { roomId });

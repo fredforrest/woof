@@ -1,19 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 import { getCurrentUser, canUserAccessRoom, logSecurityEvent, handleSecureError } from '../utils/security';
 import { useNotifications } from './useNotifications';
-
-export interface Message {
-  id: string;
-  text: string;
-  createdAt: FirebaseFirestoreTypes.Timestamp;
-  userId: string;
-  senderName: string;
-  senderAvatarUrl?: string | null;
-  isTyping?: boolean;
-  photoURL?: string;
-}
+import { ChatService, Message } from '../services';
 
 interface UseMessagesReturn {
   messages: Message[];
@@ -34,7 +24,7 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
   const [roomName, setRoomName] = useState<string>('');
   const flatListRef = useRef<any>(null);
 
-  // Initialize notifications for this room
+  // Init notifications for this room
   const { showMessageNotification, cancelRoomNotifications, appState } = useNotifications(roomId);
 
   // Load more messages function
@@ -44,38 +34,21 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
     setLoadingMore(true);
     
     try {
-      const snapshot = await firestore()
-        .collection('chatRooms')
-        .doc(roomId)
-        .collection('messages')
-        .orderBy('createdAt', 'desc')
-        .startAfter(lastVisible)
-        .limit(50)
-        .get();
-
-      const fetchedMessages: Message[] = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (data?.createdAt) {
-          fetchedMessages.push({
-            id: doc.id,
-            ...data,
-          } as Message);
-        }
-      });
-
-      if (fetchedMessages.length > 0) {
+      const result = await ChatService.loadMoreMessages(roomId, lastVisible, 50);
+      
+      if (result.messages.length > 0) {
         setMessages(prev => {
           const existingIds = new Set(prev.map(msg => msg.id));
-          const uniqueNewMessages = fetchedMessages.filter(msg => !existingIds.has(msg.id));
-          return [...uniqueNewMessages.reverse(), ...prev];
+          const uniqueNewMessages = result.messages.filter(msg => !existingIds.has(msg.id));
+          return [...uniqueNewMessages, ...prev];
         });
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setLastVisible(result.lastVisible);
       }
       
-      setHasMore(snapshot.size === 50);
+      setHasMore(result.hasMore);
     } catch (error) {
       console.error('Error loading more messages:', error);
+      Alert.alert('Error', 'Failed to load more messages');
     } finally {
       setLoadingMore(false);
     }
@@ -118,81 +91,48 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
           return;
         }
 
-        // Fetch room details for notifications
-        const roomDoc = await firestore().collection('chatRooms').doc(roomId).get();
-        if (roomDoc.exists()) {
-          const roomData = roomDoc.data();
-          setRoomName(roomData?.name || 'Unknown Room');
+        // Fetch room details using service
+        const room = await ChatService.getRoom(roomId);
+        if (room) {
+          setRoomName(room.name || 'Unknown Room');
         }
 
         // Log security event
         await logSecurityEvent('chat_room_accessed', { roomId });
 
-        // Initial fetch of last 50 messages
-        const initialSnapshot = await firestore()
-          .collection('chatRooms')
-          .doc(roomId)
-          .collection('messages')
-          .orderBy('createdAt', 'desc')
-          .limit(50)
-          .get();
-
-        const fetchedMessages: Message[] = [];
-        initialSnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data?.createdAt) {
-            fetchedMessages.push({
-              id: doc.id,
-              ...data,
-            } as Message);
-          }
-        });
-
-        setMessages(fetchedMessages.reverse());
-        setLastVisible(initialSnapshot.docs[initialSnapshot.docs.length - 1]);
-        setHasMore(initialSnapshot.size === 50);
+        // Get initial messages using service
+        const result = await ChatService.getInitialMessages(roomId, 50);
+        
+        setMessages(result.messages);
+        setLastVisible(result.lastVisible);
+        setHasMore(result.hasMore);
         setLoading(false);
 
-        // Set up real-time listener for new messages only
-        if (initialSnapshot.docs.length > 0) {
-          messagesListener = firestore()
-            .collection('chatRooms')
-            .doc(roomId)
-            .collection('messages')
-            .where('createdAt', '>', initialSnapshot.docs[0].data().createdAt)
-            .orderBy('createdAt', 'desc')
-            .onSnapshot(
-              newSnapshot => {
-                const newMessages: Message[] = [];
-                newSnapshot.forEach(doc => {
-                  const data = doc.data();
-                  if (data?.createdAt) {
-                    newMessages.push({
-                      id: doc.id,
-                      ...data,
-                    } as Message);
-                  }
+        // Set up real-time listener for new messages
+        if (result.messages.length > 0 && result.messages[result.messages.length - 1].createdAt) {
+          const lastMessageTimestamp = result.messages[result.messages.length - 1].createdAt;
+          
+          messagesListener = ChatService.createNewMessagesListener(
+            roomId,
+            lastMessageTimestamp,
+            (newMessages) => {
+              setMessages(prev => {
+                const existingIds = new Set(prev.map(msg => msg.id));
+                const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+                
+                // Show notifications for new messages
+                uniqueNewMessages.forEach(message => {
+                  showMessageNotification(message, roomName);
                 });
                 
-                if (newMessages.length > 0) {
-                  setMessages(prev => {
-                    const existingIds = new Set(prev.map(msg => msg.id));
-                    const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
-                    
-                    // Show notifications for new messages
-                    uniqueNewMessages.forEach(message => {
-                      showMessageNotification(message, roomName);
-                    });
-                    
-                    return [...prev, ...uniqueNewMessages.reverse()];
-                  });
-                }
-              },
-              error => {
-                console.error(`Error listening for new messages: `, error);
-                handleSecureError(error, 'Error loading new messages.');
-              }
-            );
+                return [...prev, ...uniqueNewMessages];
+              });
+            },
+            (error) => {
+              console.error('Error listening for new messages:', error);
+              handleSecureError(error, 'Error loading new messages.');
+            }
+          );
         }
       } catch (error) {
         console.error(`Error fetching messages for room ${roomId}: `, error);
@@ -224,3 +164,6 @@ export const useMessages = (roomId: string): UseMessagesReturn => {
     roomName,
   };
 };
+
+// Re-export Message type for backward compatibility
+export type { Message };

@@ -8,9 +8,9 @@ import {
   Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import FriendsListComponent from '../components/ui/FriendsListComponent';
-import FriendRequestsComponent from '../components/ui/FriendRequestsComponent';
-import FriendSearchComponent from '../components/ui/FriendSearchComponent';
+import FriendsList from '../components/ui/FriendsList';
+import FriendRequests from '../components/ui/FriendRequests';
+import FriendSearch from '../components/ui/FriendSearch';
 
 type TabType = 'friends' | 'requests' | 'search';
 
@@ -62,11 +62,11 @@ const FriendsScreen: React.FC = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'friends':
-        return <FriendsListComponent onFriendPress={handleFriendPress} />;
+        return <FriendsList onFriendPress={handleFriendPress} />;
       case 'requests':
-        return <FriendRequestsComponent onRequestsChange={setRequestCount} />;
+        return <FriendRequests onRequestsChange={setRequestCount} />;
       case 'search':
-        return <FriendSearchComponent onRequestSent={handleRequestSent} onCancel={() => {}} />;
+        return <FriendSearch onRequestSent={handleRequestSent} onCancel={() => {}} />;
       default:
         return null;
     }

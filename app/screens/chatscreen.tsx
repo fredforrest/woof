@@ -11,7 +11,7 @@ import {
 import auth from '@react-native-firebase/auth';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { validateRoomId } from '../utils/security';
-import { useActiveRoom } from '../contexts/activeRoomContext';
+import { useActiveRoom } from '../contexts/ActiveRoomContext';
 
 // Import new hooks and components
 import { 

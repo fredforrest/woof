@@ -11,7 +11,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
  * UserProfile: { userId: string };
  */
 export type RootStackParamList = {
-  // Use the exact string names from your <Stack.Screen name="..." /> components
   LoginMenu: undefined;
   Home: undefined; // This screen does not need quotes around the name, when it is a single word
   ChatRooms: undefined;

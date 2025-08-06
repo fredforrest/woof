@@ -24,7 +24,7 @@ interface FriendSearchProps {
   onCancel: () => void;
 }
 
-const FriendSearchComponent: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) => {
+const FriendSearch: React.FC<FriendSearchProps> = ({ onRequestSent, onCancel }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [searching, setSearching] = useState(false);
@@ -473,4 +473,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FriendSearchComponent;
+export default FriendSearch;
