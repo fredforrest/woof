@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { RootStackNavigationProp } from '../components/navigation/types';
@@ -12,16 +12,15 @@ const HomeScreen = () => {
     useEffect(() => {
         const currentUser = auth().currentUser;
         if (currentUser) {
-            setUserName(currentUser.displayName || 'DogLover69'); // Set the user name from Firebase
+            setUserName(currentUser.displayName || 'DogLover69');
         }
     }, []);
-    // Handle Logout
-    // This function will be called when the user presses the "Log Out" button
+
     const handleLogout = async () => {
         try {
             await auth().signOut();
             Alert.alert('Success', 'You have been logged out.');
-            navigation.navigate('LoginMenu'); // Navigate back to the login screen
+            navigation.navigate('LoginMenu');
         } catch (error) {
             console.error('Logout Error:', error);
             Alert.alert('Error', 'Failed to log out. Please try again.');
@@ -30,41 +29,32 @@ const HomeScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Logo/Image */}
-            <Image
-                source={require('../images/homelogo.jpg')}
-                style={styles.logo}
-            />
-
-            {/* Title */}
-            <Text style={styles.title}>Welcome to Woof Social</Text>
-            
-             {/* User Name with Rounded Edge */}
-             <View style={styles.userNameContainer}>
-                <Text style={styles.userName}>{userName}</Text>
-            </View>
-
-
-            {/* Navigate to Profile */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('Profile')}
+            <ScrollView 
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
             >
-                <Text style={styles.buttonText}>Go to Profile</Text>
-            </TouchableOpacity>
+                <Image source={require('../images/wooflogo.jpg')} style={styles.logo} />
 
-            {/* Navigate to Chat Rooms */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('ChatRooms')}
-            >
-                <Text style={styles.buttonText}>Go to Chat Rooms</Text>
-            </TouchableOpacity>
+                <Text style={styles.title}>Welcome, {userName}</Text>
 
-            {/* Log Out Button */}
-            <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
-                <Text style={styles.buttonText}>Log Out</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('Profile')}
+                >
+                    <Text style={styles.buttonText}>Go to Profile</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('ChatRooms')}
+                >
+                    <Text style={styles.buttonText}>Go to Chat Rooms</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+                    <Text style={styles.buttonText}>Log Out</Text>
+                </TouchableOpacity>
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -72,56 +62,57 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'flex-start', // Move content to the top
-        alignItems: 'center',
         backgroundColor: '#FDFDFD',
+    },
+    scrollContent: {
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         padding: 16,
+        paddingBottom: 40,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 20,
         color: '#333',
     },
     userNameContainer: {
-        backgroundColor: '#E3F2FD', // Light blue background
-        paddingVertical: 5,
+        backgroundColor: '#007AFF',
         paddingHorizontal: 20,
-        borderRadius: 20, // Rounded edges
-        marginVertical: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
         marginBottom: 30,
     },
     userName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#2196F3',
-        marginVertical: 20,
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#FFFFFF',
     },
     button: {
-        backgroundColor: '#2196F3', // Blue button
-        padding: 15,
+        backgroundColor: '#007AFF',
+        paddingVertical: 15,
+        paddingHorizontal: 30,
         borderRadius: 8,
-        alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 25,
         width: '80%',
-        marginTop: 30,
-    },
-    logoutButton: {
-        backgroundColor: '#FF3B30', // Red button for logout
     },
     buttonText: {
-        color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#FFFFFF',
+        textAlign: 'center',
+    },
+    logoutButton: {
+        backgroundColor: '#FF3B30',
+        marginTop: 20,
     },
     logo: {
-        width: 200,
-        height: 200,
+        width: 300,
+        height: 300,
+        borderRadius: 20,
         marginBottom: 20,
-        marginTop: 20, // Add margin to move the image down slightly from the top
+        resizeMode: 'contain',
     },
 });
 
 export default HomeScreen;
-
-
