@@ -23,7 +23,8 @@ import {
   useSecurity,
   Message
 } from '../hooks';
-import { MessageList, MessageInput } from '../components/chat';
+import MessageList from '../components/chat/MessageList';
+import MessageInput from '../components/chat/MessageInput';
 
 const ChatScreen = ({ route }: any) => {
   const { roomId, roomName } = route.params; // Get roomId and roomName from navigation parameters
